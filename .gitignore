@@ -1,0 +1,27 @@
+# Clés API — NE JAMAIS COMMIT
+.env
+
+# Environnement virtuel Python
+venv/
+rag-env/
+.venv/
+
+# Base vectorielle (se régénère à l'ingestion)
+data/chroma_db/*
+!data/chroma_db/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
