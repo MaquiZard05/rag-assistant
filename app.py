@@ -65,6 +65,42 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 
+def get_confidence(sources):
+    """Determine la confiance basee sur le meilleur score de pertinence."""
+    if not sources:
+        return "confidence-low", "Confiance faible"
+
+    best_score = min(s["score"] for s in sources)
+
+    if best_score < 13:
+        return "confidence-high", "Confiance elevee"
+    elif best_score < 18:
+        return "confidence-medium", "Confiance moyenne"
+    else:
+        return "confidence-low", "Confiance faible"
+
+
+def render_sources(sources):
+    """Affiche les sources avec leur score de pertinence."""
+    confidence_class, confidence_label = get_confidence(sources)
+
+    st.markdown(
+        f'<span class="{confidence_class}">{confidence_label} — {len(sources)} source(s)</span>',
+        unsafe_allow_html=True,
+    )
+
+    if sources:
+        with st.expander("📎 Voir les sources"):
+            for src in sources:
+                score_pct = max(0, min(100, 100 - (src["score"] - 8) * 10))
+                st.markdown(
+                    f'<div class="source-box">📄 <strong>{src["file"]}</strong>, '
+                    f'page {src["page"]} '
+                    f'<em>(pertinence : {score_pct:.0f}%)</em></div>',
+                    unsafe_allow_html=True,
+                )
+
+
 # --- Sidebar ---
 with st.sidebar:
     st.markdown("### 📁 Gestion des documents")
@@ -133,36 +169,7 @@ for message in st.session_state.messages:
 
         # Afficher les sources si c'est une reponse assistant
         if message["role"] == "assistant" and "sources" in message:
-            sources = message["sources"]
-            num_sources = message.get("num_sources", 0)
-
-            # Indicateur de confiance
-            if num_sources >= 4:
-                confidence_class = "confidence-high"
-                confidence_label = "Confiance elevee"
-            elif num_sources >= 2:
-                confidence_class = "confidence-medium"
-                confidence_label = "Confiance moyenne"
-            else:
-                confidence_class = "confidence-low"
-                confidence_label = "Confiance faible"
-
-            st.markdown(
-                f'<span class="{confidence_class}">{confidence_label} — {num_sources} source(s) trouvee(s)</span>',
-                unsafe_allow_html=True,
-            )
-
-            # Afficher les sources
-            if sources:
-                with st.expander("📎 Voir les sources"):
-                    for src in sources:
-                        score_pct = max(0, 100 - src["score"] * 50)
-                        st.markdown(
-                            f'<div class="source-box">📄 <strong>{src["file"]}</strong>, '
-                            f'page {src["page"]} '
-                            f'<em>(pertinence : {score_pct:.0f}%)</em></div>',
-                            unsafe_allow_html=True,
-                        )
+            render_sources(message["sources"])
 
 
 # Input utilisateur
@@ -188,44 +195,13 @@ if prompt := st.chat_input("Posez votre question sur vos documents..."):
 
                     # Afficher la reponse
                     st.markdown(result["answer"])
-
-                    sources = result["sources"]
-                    num_sources = result["num_sources"]
-
-                    # Indicateur de confiance
-                    if num_sources >= 4:
-                        confidence_class = "confidence-high"
-                        confidence_label = "Confiance elevee"
-                    elif num_sources >= 2:
-                        confidence_class = "confidence-medium"
-                        confidence_label = "Confiance moyenne"
-                    else:
-                        confidence_class = "confidence-low"
-                        confidence_label = "Confiance faible"
-
-                    st.markdown(
-                        f'<span class="{confidence_class}">{confidence_label} — {num_sources} source(s) trouvee(s)</span>',
-                        unsafe_allow_html=True,
-                    )
-
-                    # Sources dans un expander
-                    if sources:
-                        with st.expander("📎 Voir les sources"):
-                            for src in sources:
-                                score_pct = max(0, min(100, 100 - (src["score"] - 8) * 10))
-                                st.markdown(
-                                    f'<div class="source-box">📄 <strong>{src["file"]}</strong>, '
-                                    f'page {src["page"]} '
-                                    f'<em>(pertinence : {score_pct:.0f}%)</em></div>',
-                                    unsafe_allow_html=True,
-                                )
+                    render_sources(result["sources"])
 
                     # Sauvegarder dans l'historique
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": result["answer"],
-                        "sources": sources,
-                        "num_sources": num_sources,
+                        "sources": result["sources"],
                     })
 
                 except Exception as e:
