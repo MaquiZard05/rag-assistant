@@ -77,23 +77,22 @@
 
 ---
 
-### JOUR 3 (Samedi) — FEATURES PRO + MULTI-TENANT
+### JOUR 3 (Samedi) — FEATURES PRO + MULTI-TENANT ✅ TERMINÉ
 
 **Matin (9h-12h) — Fonctionnalités avancées**
-- [ ] Ajouter la gestion multi-collections (= multi-clients : chaque client a sa propre base de docs)
-- [ ] Implémenter la conversation avec historique (le chatbot se souvient des questions précédentes)
-- [ ] Ajouter un système de "system prompt" personnalisable par client (ton de réponse, langue, spécialité)
+- [x] Ajouter la gestion multi-collections (= multi-clients : chaque client a sa propre base de docs)
+- [x] Implémenter la conversation avec historique (reformulation de question via LLM)
+- [x] Ajouter un système de "system prompt" personnalisable par client (ton de réponse, langue, spécialité)
 
 **Après-midi (14h-18h) — Robustesse**
-- [ ] Gérer les erreurs proprement (document corrompu, API timeout, etc.)
-- [ ] Ajouter un panneau admin : voir les documents chargés, supprimer, recharger
-- [ ] Optimiser les coûts API (cache des embeddings, limiter les tokens envoyés)
-- [ ] Tester la performance avec 20-50 documents
+- [x] Gérer les erreurs proprement (document corrompu, API timeout, etc.)
+- [x] Ajouter un panneau admin : dashboard + gestion clients + documents + system prompts
+- [x] Optimiser la qualite (reranking cross-encoder, contextual chunk headers)
+- [x] Architecture multi-pages Streamlit + CSS pro externe
 
 **Soirée (20h-22h) — Documentation technique**
-- [ ] Écrire un README propre sur GitHub
-- [ ] Documenter l'installation et le déploiement
-- [ ] Préparer les captures d'écran de l'interface
+- [x] README a jour
+- [x] Design doc sauvegarde dans docs/plans/
 
 **🎓 Ce que tu apprends Jour 3** : Ce qu'est le multi-tenant (= un système qui sert plusieurs clients isolés les uns des autres), comment gérer la mémoire conversationnelle, comment optimiser les coûts API en production.
 

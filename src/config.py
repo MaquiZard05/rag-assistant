@@ -17,6 +17,7 @@ LLM_MODEL = "llama-3.1-8b-instant"
 # --- Chemins ---
 DOCS_DIR = PROJECT_ROOT / "docs"
 CHROMA_DIR = PROJECT_ROOT / "data" / "chroma_db"
+CLIENTS_FILE = PROJECT_ROOT / "data" / "clients.json"
 
 # --- Chunking ---
 # Teste avec compare_chunks.py : 500/100 donne les meilleurs scores de pertinence
@@ -25,3 +26,13 @@ CHUNK_OVERLAP = 100
 
 # --- Retrieval ---
 TOP_K = 5
+RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# --- Multi-tenant ---
+DEFAULT_COLLECTION = "default"
+DEFAULT_SYSTEM_PROMPT = (
+    "Tu es un assistant qui repond aux questions en te basant UNIQUEMENT "
+    "sur le contexte fourni ci-dessous. "
+    "Si l'information n'est pas dans le contexte, dis-le clairement. "
+    "Cite toujours tes sources (nom du fichier et numero de page)."
+)

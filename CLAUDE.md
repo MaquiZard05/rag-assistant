@@ -31,10 +31,17 @@ rag-assistant/
 ├── src/
 │   ├── __init__.py
 │   ├── config.py          # Configuration centralisée (modèles, params, chemins)
-│   ├── ingest.py          # Script d'ingestion (PDFs → chunks → ChromaDB)
-│   └── query.py           # Script de query RAG (question → réponse sourcée)
-├── app.py                 # Interface Streamlit (point d'entrée)
+│   ├── clients.py         # CRUD clients multi-tenant
+│   ├── ingest.py          # Ingestion (PDFs → chunks + headers → ChromaDB)
+│   └── query.py           # Pipeline RAG (historique → hybride → rerank → LLM)
+├── app.py                 # Point d'entrée Streamlit (CSS + redirect)
+├── pages/
+│   ├── 1_💬_Chat.py       # Interface RAG (chat + upload + historique)
+│   └── 2_⚙️_Admin.py     # Panneau admin (clients, docs, prompts)
+├── styles/
+│   └── main.css           # CSS pro externe
 ├── data/
+│   ├── clients.json       # Config clients multi-tenant
 │   ├── raw/               # Documents originaux uploadés
 │   └── chroma_db/         # Base vectorielle ChromaDB (persistante)
 ├── tests/
@@ -102,8 +109,17 @@ rag-assistant/
   - app.py Streamlit : interface pro, upload PDF immédiat, chat, sources, indicateur de confiance
   - Refactoring : ingest_single_pdf() + ask() pour réutilisation
   - Script de comparaison tests/compare_chunks.py
-- **Jour 3** : Multi-tenant + historique conversation + admin ⬅️ EN COURS
-- **Jour 4** : Déploiement Streamlit Cloud + démo Loom
+- **Jour 3** : Multi-tenant + historique conversation + admin ✅ TERMINÉ
+  - Architecture multi-pages : app.py + pages/1_Chat.py + pages/2_Admin.py
+  - CSS externe pro : styles/main.css (palette bleu corporate)
+  - Multi-client : clients.json + collection ChromaDB par client + selecteur sidebar
+  - Historique conversation : reformulation de question via LLM avant retrieval
+  - System prompt personnalisable par client
+  - Panneau admin : dashboard metrics + CRUD clients + gestion docs + edit prompts
+  - Reranking cross-encoder (ms-marco-MiniLM-L-6-v2) post-retrieval
+  - Contextual Chunk Headers (source + page injectes dans le chunk avant embedding)
+  - Gestion erreurs : timeout Groq, validation PDF, messages clairs
+- **Jour 4** : Déploiement Streamlit Cloud + démo Loom ⬅️ EN COURS
 - **Jour 5** : Packaging commercial + outreach
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.

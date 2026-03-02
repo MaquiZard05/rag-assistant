@@ -10,7 +10,13 @@ from langchain_community.vectorstores import Chroma
 
 from config import (
     EMBEDDING_MODEL, DOCS_DIR, CHROMA_DIR, CHUNK_SIZE, CHUNK_OVERLAP,
+    DEFAULT_COLLECTION,
 )
+
+
+def get_embeddings():
+    """Retourne le modele d'embeddings."""
+    return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
 
 def load_pdfs(docs_dir: Path) -> list:
@@ -41,63 +47,68 @@ def split_documents(documents: list) -> list:
     return splitter.split_documents(documents)
 
 
-def create_vectorstore(chunks: list):
-    """Genere les embeddings et stocke dans ChromaDB."""
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+def add_contextual_headers(chunks: list) -> list:
+    """Ajoute un header contextuel a chaque chunk (source + page).
 
-    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-
-    vectorstore = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory=str(CHROMA_DIR),
-        collection_name="rag_docs",
-    )
-    return vectorstore
-
-
-def get_embeddings():
-    """Retourne le modele d'embeddings."""
-    return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    Le header est encode dans le vecteur, ce qui ameliore la pertinence
+    de la recherche semantique.
+    """
+    for chunk in chunks:
+        source = Path(chunk.metadata.get("source", "inconnu")).name
+        page = chunk.metadata.get("page", 0) + 1
+        header = f"[Source: {source} | Page {page}]\n\n"
+        chunk.page_content = header + chunk.page_content
+    return chunks
 
 
-def ingest_single_pdf(pdf_path: Path, original_name: str = None) -> int:
+def ingest_single_pdf(pdf_path: Path, collection_name: str = DEFAULT_COLLECTION,
+                      original_name: str = None) -> int:
     """Ingere un seul PDF dans ChromaDB. Retourne le nombre de chunks ajoutes.
 
-    original_name : nom original du fichier (pour les uploads Streamlit qui
-                    utilisent un fichier temporaire).
+    collection_name : collection ChromaDB (= client)
+    original_name : nom original du fichier (pour les uploads Streamlit)
     """
+    # Verifier que le fichier existe et est un PDF
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"Fichier introuvable : {pdf_path}")
+    if pdf_path.suffix.lower() != ".pdf":
+        raise ValueError(f"Le fichier n'est pas un PDF : {pdf_path.name}")
+
     # Charger le PDF
-    loader = PyPDFLoader(str(pdf_path))
-    documents = loader.load()
+    try:
+        loader = PyPDFLoader(str(pdf_path))
+        documents = loader.load()
+    except Exception as e:
+        raise ValueError(f"Impossible de lire le PDF '{pdf_path.name}' : {e}")
 
     # Remplacer le chemin temporaire par le vrai nom de fichier
     if original_name:
         for doc in documents:
             doc.metadata["source"] = original_name
 
-    # Decouper en chunks
+    # Decouper en chunks + ajouter les headers contextuels
     chunks = split_documents(documents)
+    chunks = add_contextual_headers(chunks)
 
     if not chunks:
         return 0
 
-    # Ajouter a la base existante (ou en creer une nouvelle)
+    # Ajouter a la collection du client
     embeddings = get_embeddings()
     CHROMA_DIR.mkdir(parents=True, exist_ok=True)
 
     vectorstore = Chroma(
         persist_directory=str(CHROMA_DIR),
         embedding_function=embeddings,
-        collection_name="rag_docs",
+        collection_name=collection_name,
     )
     vectorstore.add_documents(chunks)
 
     return len(chunks)
 
 
-def get_indexed_files() -> list[str]:
-    """Retourne la liste des fichiers deja indexes dans ChromaDB."""
+def get_indexed_files(collection_name: str = DEFAULT_COLLECTION) -> list[str]:
+    """Retourne la liste des fichiers indexes dans une collection."""
     if not CHROMA_DIR.exists():
         return []
 
@@ -105,10 +116,9 @@ def get_indexed_files() -> list[str]:
     vectorstore = Chroma(
         persist_directory=str(CHROMA_DIR),
         embedding_function=embeddings,
-        collection_name="rag_docs",
+        collection_name=collection_name,
     )
 
-    # Recuperer toutes les metadonnees pour extraire les noms de fichiers
     collection = vectorstore.get()
     if not collection or not collection.get("metadatas"):
         return []
@@ -123,21 +133,27 @@ def get_indexed_files() -> list[str]:
 
 
 def main():
+    """Ingestion CLI des PDFs du dossier docs/ dans la collection par defaut."""
     print("=== Ingestion des documents ===\n")
 
-    # 1. Charger les PDFs
     print(f"1. Chargement des PDFs depuis {DOCS_DIR}/")
     documents = load_pdfs(DOCS_DIR)
     print(f"   -> {len(documents)} pages chargees\n")
 
-    # 2. Decouper en chunks
     print("2. Decoupage en chunks")
     chunks = split_documents(documents)
+    chunks = add_contextual_headers(chunks)
     print(f"   -> {len(chunks)} chunks crees\n")
 
-    # 3. Embeddings + stockage
     print("3. Generation des embeddings et stockage dans ChromaDB...")
-    create_vectorstore(chunks)
+    embeddings = get_embeddings()
+    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+    Chroma.from_documents(
+        documents=chunks,
+        embedding=embeddings,
+        persist_directory=str(CHROMA_DIR),
+        collection_name=DEFAULT_COLLECTION,
+    )
     print(f"   -> Base vectorielle sauvegardee dans {CHROMA_DIR}\n")
 
     print("=== Ingestion terminee ===")

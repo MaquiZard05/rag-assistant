@@ -1,0 +1,169 @@
+/* === APP GLOBAL === */
+.stApp {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* === SIDEBAR === */
+[data-testid="stSidebar"] {
+    background-color: #1a365d;
+    color: #ffffff;
+}
+
+[data-testid="stSidebar"] .stMarkdown {
+    color: #e2e8f0;
+}
+
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stMultiSelect label {
+    color: #e2e8f0;
+}
+
+[data-testid="stSidebarNav"] {
+    padding-top: 1rem;
+}
+
+/* === HEADER CUSTOM === */
+.main-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 0 1rem;
+    background: linear-gradient(135deg, #1a365d 0%, #2d5aa0 100%);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 1.6em;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.main-header p {
+    margin: 0.3rem 0 0;
+    color: #cbd5e0;
+    font-size: 0.95em;
+}
+
+/* === CHAT MESSAGES === */
+[data-testid="stChatMessage"] {
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    background-color: #edf2f7;
+    border: 1px solid #e2e8f0;
+}
+
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* === CHAT INPUT === */
+[data-testid="stChatInput"] {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+[data-testid="stChatInput"]:focus-within {
+    border-color: #2d5aa0;
+    box-shadow: 0 0 0 3px rgba(45, 90, 160, 0.1);
+}
+
+/* === BOUTONS === */
+.stButton > button {
+    background-color: #2d5aa0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.stButton > button:hover {
+    background-color: #1a365d;
+}
+
+/* === FILE UPLOADER === */
+[data-testid="stFileUploader"] {
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 1rem;
+    background-color: #ffffff;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: #2d5aa0;
+    background-color: #f7fafc;
+}
+
+/* === EXPANDERS (sources) === */
+.streamlit-expanderHeader {
+    background-color: #f7fafc;
+    border-radius: 8px;
+    font-size: 0.9em;
+}
+
+/* === BADGES CONFIANCE === */
+.confidence-high {
+    color: #38a169;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.confidence-medium {
+    color: #d69e2e;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.confidence-low {
+    color: #e53e3e;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+/* === SOURCE BOX === */
+.source-box {
+    background-color: #f0f4f8;
+    border-left: 3px solid #1e3a5f;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
+}
+
+/* === METRIC CARDS (admin) === */
+.metric-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.metric-card h3 {
+    color: #2d5aa0;
+    font-size: 2em;
+    margin: 0;
+}
+
+.metric-card p {
+    color: #718096;
+    font-size: 0.85em;
+    margin: 0.3rem 0 0;
+}
+
+/* === HIDE DEFAULT STREAMLIT === */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
