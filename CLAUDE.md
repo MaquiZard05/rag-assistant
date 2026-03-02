@@ -33,7 +33,7 @@ rag-assistant/
 │   ├── config.py          # Configuration centralisée (modèles, params, chemins)
 │   ├── ingest.py          # Script d'ingestion (PDFs → chunks → ChromaDB)
 │   └── query.py           # Script de query RAG (question → réponse sourcée)
-├── app.py                 # Interface Streamlit (point d'entrée) — à créer Jour 2
+├── app.py                 # Interface Streamlit (point d'entrée)
 ├── data/
 │   ├── raw/               # Documents originaux uploadés
 │   └── chroma_db/         # Base vectorielle ChromaDB (persistante)
@@ -96,8 +96,13 @@ rag-assistant/
   - Embeddings : sentence-transformers all-MiniLM-L6-v2 (local)
   - LLM : Groq API (llama-3.1-8b-instant)
   - Nettoyage technique fait (fichiers vides supprimés, dépendances OK)
-- **Jour 2** : Qualité des réponses + interface Streamlit ⬅️ EN COURS
-- **Jour 3** : Multi-tenant + historique conversation + admin
+- **Jour 2** : Qualité des réponses + interface Streamlit ✅ TERMINÉ
+  - Chunking optimisé : 500/100 au lieu de 1000/200 (test scientifique via compare_chunks.py)
+  - 62 chunks au lieu de 33 — meilleure granularité de recherche
+  - app.py Streamlit : interface pro, upload PDF immédiat, chat, sources, indicateur de confiance
+  - Refactoring : ingest_single_pdf() + ask() pour réutilisation
+  - Script de comparaison tests/compare_chunks.py
+- **Jour 3** : Multi-tenant + historique conversation + admin ⬅️ EN COURS
 - **Jour 4** : Déploiement Streamlit Cloud + démo Loom
 - **Jour 5** : Packaging commercial + outreach
 

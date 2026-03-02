@@ -56,6 +56,63 @@ def create_vectorstore(chunks: list):
     return vectorstore
 
 
+def get_embeddings():
+    """Retourne le modele d'embeddings."""
+    return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+
+
+def ingest_single_pdf(pdf_path: Path) -> int:
+    """Ingere un seul PDF dans ChromaDB. Retourne le nombre de chunks ajoutes."""
+    # Charger le PDF
+    loader = PyPDFLoader(str(pdf_path))
+    documents = loader.load()
+
+    # Decouper en chunks
+    chunks = split_documents(documents)
+
+    if not chunks:
+        return 0
+
+    # Ajouter a la base existante (ou en creer une nouvelle)
+    embeddings = get_embeddings()
+    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+
+    vectorstore = Chroma(
+        persist_directory=str(CHROMA_DIR),
+        embedding_function=embeddings,
+        collection_name="rag_docs",
+    )
+    vectorstore.add_documents(chunks)
+
+    return len(chunks)
+
+
+def get_indexed_files() -> list[str]:
+    """Retourne la liste des fichiers deja indexes dans ChromaDB."""
+    if not CHROMA_DIR.exists():
+        return []
+
+    embeddings = get_embeddings()
+    vectorstore = Chroma(
+        persist_directory=str(CHROMA_DIR),
+        embedding_function=embeddings,
+        collection_name="rag_docs",
+    )
+
+    # Recuperer toutes les metadonnees pour extraire les noms de fichiers
+    collection = vectorstore.get()
+    if not collection or not collection.get("metadatas"):
+        return []
+
+    files = set()
+    for meta in collection["metadatas"]:
+        source = meta.get("source", "")
+        if source:
+            files.add(Path(source).name)
+
+    return sorted(files)
+
+
 def main():
     print("=== Ingestion des documents ===\n")
 

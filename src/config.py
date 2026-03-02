@@ -18,8 +18,9 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 CHROMA_DIR = PROJECT_ROOT / "data" / "chroma_db"
 
 # --- Chunking ---
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+# Teste avec compare_chunks.py : 500/100 donne les meilleurs scores de pertinence
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 100
 
 # --- Retrieval ---
 TOP_K = 5

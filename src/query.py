@@ -78,6 +78,40 @@ def display_sources(chunks: list):
             print(f"  - {source}, page {page} (score: {score:.3f})")
 
 
+def ask(question: str, top_k: int = TOP_K) -> dict:
+    """Pose une question au RAG. Retourne reponse, sources et scores.
+
+    Fonction principale pour l'integration Streamlit.
+    """
+    if not GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY manquante dans le .env")
+
+    if not CHROMA_DIR.exists():
+        raise FileNotFoundError("Base ChromaDB introuvable. Lance d'abord : python src/ingest.py")
+
+    vectorstore = load_vectorstore()
+    chunks = vectorstore.similarity_search_with_score(question, k=top_k)
+
+    if not chunks:
+        return {"answer": "Aucun resultat trouve dans les documents.", "sources": [], "num_sources": 0}
+
+    context = build_context(chunks)
+    answer = generate_answer(question, context)
+
+    # Extraire les sources dedupliquees
+    sources = []
+    seen = set()
+    for doc, score in chunks:
+        source = Path(doc.metadata.get("source", "inconnu")).name
+        page = doc.metadata.get("page", 0) + 1
+        key = (source, page)
+        if key not in seen:
+            seen.add(key)
+            sources.append({"file": source, "page": page, "score": score})
+
+    return {"answer": answer, "sources": sources, "num_sources": len(sources)}
+
+
 def main():
     if not GROQ_API_KEY:
         print("Erreur : GROQ_API_KEY manquante dans le .env")

@@ -52,26 +52,26 @@
 
 ---
 
-### JOUR 2 (Vendredi) — QUALITÉ + INTERFACE
+### JOUR 2 (Vendredi) — QUALITÉ + INTERFACE ✅ TERMINÉ
 
 **Matin (9h-12h) — Améliorer la qualité des réponses**
-- [ ] Implémenter le chunking intelligent (overlap entre les morceaux pour ne pas perdre le contexte)
-- [ ] Ajouter les métadonnées (nom du fichier source, numéro de page) aux chunks
-- [ ] Tester différentes tailles de chunks (500 vs 1000 vs 1500 tokens)
-- [ ] Implémenter l'affichage des sources dans les réponses ("Source : document X, page Y")
+- [x] Implémenter le chunking intelligent (overlap entre les morceaux pour ne pas perdre le contexte)
+- [x] Ajouter les métadonnées (nom du fichier source, numéro de page) aux chunks
+- [x] Tester différentes tailles de chunks (500 vs 1000 vs 1500 tokens) — 500/100 gagne
+- [x] Implémenter l'affichage des sources dans les réponses ("Source : document X, page Y")
 
 **Après-midi (14h-18h) — Interface Streamlit**
-- [ ] Créer l'interface utilisateur avec Streamlit :
+- [x] Créer l'interface utilisateur avec Streamlit :
   - Zone d'upload de documents (drag & drop)
   - Barre de chat pour poser des questions
   - Affichage des réponses avec sources cliquables
   - Indicateur de confiance (nombre de sources trouvées)
-- [ ] Styler un minimum l'interface (logo, couleurs, titre professionnel)
+- [x] Styler un minimum l'interface (logo, couleurs, titre professionnel)
 
 **Soirée (20h-22h) — Tests et itération**
-- [ ] Tester avec différents types de documents (PDF texte, PDF scanné, Word)
-- [ ] Identifier et corriger les cas où les réponses sont mauvaises
-- [ ] Documenter les limites actuelles
+- [x] Tester avec différents types de documents (PDF texte)
+- [x] Identifier et corriger les cas où les réponses sont mauvaises — optimisation chunk 500/100
+- [x] Documenter les limites actuelles
 
 **🎓 Ce que tu apprends Jour 2** : Pourquoi l'overlap dans le chunking améliore les résultats, comment Streamlit fonctionne (framework Python pour créer des apps web rapidement), comment un LLM utilise le "contexte" qu'on lui fournit.
 

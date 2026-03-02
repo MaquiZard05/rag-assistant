@@ -1,13 +1,15 @@
-# RAG Assistant — Assistant IA sur vos documents
+# RAG Assistant — Assistant Documentaire IA
 
-Un assistant IA qui répond aux questions de vos équipes en s'appuyant sur vos propres documents.
+Un assistant IA qui repond aux questions de vos equipes en s'appuyant sur vos propres documents.
 
-## Fonctionnalités
+## Fonctionnalites
 
-- Upload de documents (PDF, TXT)
-- Recherche intelligente dans vos documents
-- Réponses en langage naturel avec sources citées
-- Interface web simple et intuitive
+- **Upload de documents PDF** avec indexation automatique (drag & drop)
+- **Recherche intelligente** dans vos documents (base vectorielle ChromaDB)
+- **Reponses sourcees** avec nom du fichier et numero de page
+- **Indicateur de confiance** (nombre de sources trouvees)
+- **Interface web professionnelle** avec Streamlit
+- **Chunking optimise** (500 tokens, overlap 100 — teste scientifiquement)
 
 ## Installation
 
@@ -16,32 +18,72 @@ Un assistant IA qui répond aux questions de vos équipes en s'appuyant sur vos 
 git clone https://github.com/MaquiZard05/rag-assistant.git
 cd rag-assistant
 
-# Créer un environnement virtuel
+# Creer un environnement virtuel
 python -m venv venv
 source venv/bin/activate
 
-# Installer les dépendances
+# Installer les dependances
 pip install -r requirements.txt
 ```
 
 ## Configuration
 
-Créer un fichier `.env` à la racine du projet :
+Creer un fichier `.env` a la racine du projet :
 
 ```
-GROQ_API_KEY=votre_clé_groq
+GROQ_API_KEY=votre_cle_groq
 ```
+
+Obtenir une cle gratuite sur [console.groq.com](https://console.groq.com).
 
 ## Lancement
 
 ```bash
+# Activer l'environnement
+source venv/bin/activate
+
+# Indexer les documents (premiere fois ou apres ajout de PDFs dans docs/)
+python src/ingest.py
+
+# Lancer l'interface web
 streamlit run app.py
 ```
 
+L'application s'ouvre sur `http://localhost:8501`.
+
+## Utilisation
+
+1. **Deposez vos PDFs** dans la sidebar (indexation automatique)
+2. **Posez vos questions** dans la barre de chat
+3. **Consultez les sources** citees avec chaque reponse
+4. L'indicateur de confiance vous dit si la reponse est fiable
+
 ## Stack technique
 
-- **Python** + **LangChain** (orchestration RAG)
-- **ChromaDB** (base vectorielle locale)
-- **Groq API** (LLM — Llama 3 / Mixtral)
-- **HuggingFace sentence-transformers** (embeddings)
-- **Streamlit** (interface web)
+| Composant | Outil |
+|-----------|-------|
+| Langage | Python 3.11+ |
+| Orchestration RAG | LangChain |
+| Base vectorielle | ChromaDB (locale, gratuite) |
+| LLM | Groq API (Llama 3, gratuit) |
+| Embeddings | HuggingFace sentence-transformers (local) |
+| Interface | Streamlit |
+
+## Structure du projet
+
+```
+rag-assistant/
+├── app.py                 # Interface Streamlit
+├── src/
+│   ├── config.py          # Configuration centralisee
+│   ├── ingest.py          # Ingestion PDFs → ChromaDB
+│   └── query.py           # Pipeline RAG (question → reponse)
+├── docs/                  # PDFs a indexer
+├── data/chroma_db/        # Base vectorielle (generee)
+└── tests/
+    └── compare_chunks.py  # Script de comparaison de tailles de chunks
+```
+
+## Licence
+
+Projet prive — tous droits reserves.
