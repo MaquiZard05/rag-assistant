@@ -1,169 +1,295 @@
+/* ============================================
+   RAG ASSISTANT — DESIGN SYSTEM 2026
+   Calm Design + 2.5D + Sobriete
+   ============================================ */
+
+/* === RESET STREAMLIT DEFAULTS === */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* === TYPOGRAPHIE === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* === APP GLOBAL === */
 .stApp {
-    background-color: #f8f9fa;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #fafafa;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1a1a2e;
 }
 
 /* === SIDEBAR === */
 [data-testid="stSidebar"] {
-    background-color: #1a365d;
-    color: #ffffff;
+    background-color: #0f1923;
+    border-right: 1px solid rgba(255,255,255,0.06);
 }
 
-[data-testid="stSidebar"] .stMarkdown {
-    color: #e2e8f0;
+[data-testid="stSidebar"] * {
+    color: #c9d1d9 !important;
 }
 
 [data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stMultiSelect label {
-    color: #e2e8f0;
+[data-testid="stSidebar"] .stMultiSelect label,
+[data-testid="stSidebar"] .stRadio label {
+    color: #8b949e !important;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+/* Sidebar nav — clean spacing */
 [data-testid="stSidebarNav"] {
-    padding-top: 1rem;
+    padding-top: 1.5rem;
 }
 
-/* === HEADER CUSTOM === */
-.main-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 0 1rem;
-    background: linear-gradient(135deg, #1a365d 0%, #2d5aa0 100%);
-    border-radius: 12px;
+/* === CUSTOM HEADER === */
+.app-header {
+    background: #0f1923;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
     margin-bottom: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    position: relative;
+    overflow: hidden;
 }
 
-.main-header h1 {
+/* Subtle gradient accent line at top */
+.app-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.app-header h1 {
     margin: 0;
-    font-size: 1.6em;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #ffffff;
-    font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
-.main-header p {
-    margin: 0.3rem 0 0;
-    color: #cbd5e0;
-    font-size: 0.95em;
+.app-header p {
+    margin: 0.4rem 0 0;
+    color: #8b949e;
+    font-size: 0.9rem;
+    font-weight: 400;
 }
 
-/* === CHAT MESSAGES === */
+/* === CHAT AREA — The sacred space === */
+
+/* All chat messages — shared base */
 [data-testid="stChatMessage"] {
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
+    border-radius: 14px;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid transparent;
+    transition: box-shadow 0.2s ease;
 }
 
+/* User messages — subtle, recessed */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background-color: #edf2f7;
-    border: 1px solid #e2e8f0;
+    background-color: #f0f2f5;
+    border-color: #e4e7eb;
 }
 
+/* Assistant messages — elevated, prominent */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-color: #e4e7eb;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* === CHAT INPUT === */
+/* Chat input — clean with focus state */
 [data-testid="stChatInput"] {
-    border-radius: 12px;
-    border: 2px solid #e2e8f0;
+    border-radius: 14px;
 }
 
-[data-testid="stChatInput"]:focus-within {
-    border-color: #2d5aa0;
-    box-shadow: 0 0 0 3px rgba(45, 90, 160, 0.1);
+[data-testid="stChatInput"] textarea {
+    border: 2px solid #e4e7eb !important;
+    border-radius: 14px !important;
+    padding: 0.9rem 1.2rem !important;
+    font-size: 0.95rem !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    background: #ffffff !important;
 }
 
-/* === BOUTONS === */
+[data-testid="stChatInput"] textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08) !important;
+}
+
+/* === BUTTONS — 2.5D with shadow === */
 .stButton > button {
-    background-color: #2d5aa0;
-    color: white;
+    background-color: #1a1a2e;
+    color: #ffffff;
     border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1.2rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    border-radius: 10px;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .stButton > button:hover {
-    background-color: #1a365d;
+    background-color: #2d2d44;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
 }
 
-/* === FILE UPLOADER === */
+.stButton > button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* === FILE UPLOADER — Clean drop zone === */
 [data-testid="stFileUploader"] {
-    border: 2px dashed #cbd5e0;
-    border-radius: 12px;
-    padding: 1rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 14px;
+    padding: 1.2rem;
     background-color: #ffffff;
+    transition: all 0.2s ease;
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: #2d5aa0;
-    background-color: #f7fafc;
+    border-color: #3b82f6;
+    background-color: #f8faff;
 }
 
-/* === EXPANDERS (sources) === */
+/* === EXPANDERS (sources) — Subtle === */
 .streamlit-expanderHeader {
-    background-color: #f7fafc;
-    border-radius: 8px;
-    font-size: 0.9em;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4b5563;
 }
 
-/* === BADGES CONFIANCE === */
+/* === CONFIDENCE BADGES === */
 .confidence-high {
-    color: #38a169;
+    display: inline-block;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.8rem;
 }
 
 .confidence-medium {
-    color: #d69e2e;
+    display: inline-block;
+    color: #d97706;
+    background: #fffbeb;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.8rem;
 }
 
 .confidence-low {
-    color: #e53e3e;
+    display: inline-block;
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
     font-weight: 600;
-    font-size: 0.85em;
+    font-size: 0.8rem;
 }
 
 /* === SOURCE BOX === */
 .source-box {
-    background-color: #f0f4f8;
-    border-left: 3px solid #1e3a5f;
+    background-color: #f8f9fa;
+    border-left: 3px solid #3b82f6;
     padding: 8px 12px;
     margin: 4px 0;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 8px 8px 0;
     font-size: 0.85rem;
+    color: #4b5563;
 }
 
-/* === METRIC CARDS (admin) === */
+/* === METRIC CARDS (Admin page) === */
 .metric-card {
     background: #ffffff;
-    border-radius: 12px;
-    padding: 1.2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e4e7eb;
     text-align: center;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.metric-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
 }
 
 .metric-card h3 {
-    color: #2d5aa0;
-    font-size: 2em;
+    color: #1a1a2e;
+    font-size: 2.2rem;
+    font-weight: 700;
     margin: 0;
+    letter-spacing: -0.03em;
 }
 
 .metric-card p {
-    color: #718096;
-    font-size: 0.85em;
+    color: #6b7280;
+    font-size: 0.82rem;
     margin: 0.3rem 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
 }
 
-/* === HIDE DEFAULT STREAMLIT === */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
+/* === TYPING INDICATOR — Feedback vivant === */
+@keyframes typingPulse {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+}
+
+.typing-indicator {
+    display: inline-flex;
+    gap: 4px;
+    padding: 0.5rem 0;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+    animation: typingPulse 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+/* === SCROLLBAR — Subtle === */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

@@ -1,6 +1,7 @@
-"""Page Admin — Gestion clients, documents, system prompts."""
+"""Page Admin — Gestion clients, documents, upload, system prompts."""
 
 import sys
+import tempfile
 from pathlib import Path
 
 import streamlit as st
@@ -12,6 +13,7 @@ from clients import (
     list_clients, create_client, update_client_prompt,
     delete_client, get_collection_stats, delete_document,
 )
+from ingest import ingest_single_pdf
 
 # --- Configuration ---
 st.set_page_config(
@@ -32,7 +34,17 @@ def load_css(css_file: str):
 load_css("styles/main.css")
 
 
-def render_metric_card(value, label):
+def render_header(title, subtitle=None):
+    html = f'''
+    <div class="app-header">
+        <h1>{title}</h1>
+        {"<p>" + subtitle + "</p>" if subtitle else ""}
+    </div>
+    '''
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def render_metric(value, label):
     st.markdown(f'''
     <div class="metric-card">
         <h3>{value}</h3>
@@ -42,14 +54,9 @@ def render_metric_card(value, label):
 
 
 # --- Header ---
-st.markdown("""
-<div class="main-header">
-    <h1>⚙️ Administration</h1>
-    <p>Gerez vos clients, documents et parametres</p>
-</div>
-""", unsafe_allow_html=True)
+render_header("⚙️ Administration", "Gerez vos clients, documents et parametres")
 
-# --- Dashboard global ---
+# --- Dashboard ---
 clients = list_clients()
 
 total_docs = 0
@@ -63,16 +70,16 @@ for cid in clients:
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    render_metric_card(total_docs, "Documents indexes")
+    render_metric(total_docs, "Documents")
 with col2:
-    render_metric_card(total_chunks, "Chunks en base")
+    render_metric(total_chunks, "Chunks")
 with col3:
-    render_metric_card(len(clients), "Clients actifs")
+    render_metric(len(clients), "Clients")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- Creer un nouveau client ---
-st.markdown("### ➕ Nouveau client")
+# --- Nouveau client ---
+st.markdown("### Nouveau client")
 
 with st.form("new_client_form"):
     col_id, col_name = st.columns(2)
@@ -82,7 +89,6 @@ with st.form("new_client_form"):
         new_name = st.text_input("Nom complet", placeholder="Cabinet Dupont & Fils")
 
     submitted = st.form_submit_button("Creer le client")
-
     if submitted:
         if not new_id or not new_name:
             st.error("L'identifiant et le nom sont obligatoires.")
@@ -90,59 +96,85 @@ with st.form("new_client_form"):
             st.error("L'identifiant ne doit pas contenir d'espaces.")
         else:
             if create_client(new_id.lower().strip(), new_name.strip()):
-                st.success(f"Client '{new_name}' cree avec succes.")
+                st.success(f"Client '{new_name}' cree.")
                 st.rerun()
             else:
                 st.error(f"L'identifiant '{new_id}' existe deja.")
 
 st.markdown("---")
 
-# --- Liste des clients ---
-st.markdown("### 📂 Clients existants")
-
+# --- Clients existants ---
 for cid, client in clients.items():
     stats = all_stats.get(cid, {"num_docs": 0, "num_chunks": 0, "files": []})
 
     with st.expander(f"📂 {client['name']} — {stats['num_docs']} doc(s), {stats['num_chunks']} chunks"):
 
+        # Upload de documents pour ce client
+        st.markdown("**Ajouter des documents**")
+        uploaded_files = st.file_uploader(
+            f"Deposez des PDFs pour {client['name']}",
+            type=["pdf"],
+            accept_multiple_files=True,
+            key=f"upload_{cid}",
+            label_visibility="collapsed",
+        )
+
+        if uploaded_files:
+            for uploaded_file in uploaded_files:
+                processed_key = f"processed_{cid}_{uploaded_file.name}"
+                if processed_key not in st.session_state:
+                    with st.spinner(f"Indexation de {uploaded_file.name}..."):
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                            tmp.write(uploaded_file.read())
+                            tmp_path = Path(tmp.name)
+
+                        try:
+                            num_chunks = ingest_single_pdf(
+                                tmp_path,
+                                collection_name=cid,
+                                original_name=uploaded_file.name,
+                            )
+                            st.success(f"{uploaded_file.name} — {num_chunks} chunks indexes")
+                            st.session_state[processed_key] = True
+                        except Exception as e:
+                            st.error(f"Erreur : {e}")
+                        finally:
+                            tmp_path.unlink(missing_ok=True)
+
         # Documents indexes
         if stats["files"]:
-            st.markdown("**Documents indexes :**")
+            st.markdown("**Documents indexes**")
             for filename in stats["files"]:
                 col_file, col_btn = st.columns([4, 1])
                 with col_file:
                     st.markdown(f"📄 {filename}")
                 with col_btn:
-                    if st.button("🗑️", key=f"del_doc_{cid}_{filename}", help=f"Supprimer {filename}"):
+                    if st.button("Supprimer", key=f"del_doc_{cid}_{filename}"):
                         deleted = delete_document(cid, filename)
                         st.success(f"{filename} supprime ({deleted} chunks)")
                         st.rerun()
-        else:
-            st.info("Aucun document indexe pour ce client.")
 
         st.markdown("---")
 
         # System prompt
-        st.markdown("**System prompt :**")
-        prompt_key = f"prompt_{cid}"
+        st.markdown("**System prompt**")
         new_prompt = st.text_area(
-            "System prompt",
+            "Prompt",
             value=client.get("system_prompt", ""),
             height=120,
-            key=prompt_key,
+            key=f"prompt_{cid}",
             label_visibility="collapsed",
         )
 
         col_save, col_delete = st.columns([1, 1])
-
         with col_save:
-            if st.button("💾 Sauvegarder le prompt", key=f"save_{cid}"):
+            if st.button("Sauvegarder", key=f"save_{cid}"):
                 update_client_prompt(cid, new_prompt)
                 st.success("Prompt sauvegarde.")
 
         with col_delete:
             if cid != "default":
-                if st.button("🗑️ Supprimer ce client", key=f"del_client_{cid}", type="secondary"):
+                if st.button("Supprimer ce client", key=f"del_client_{cid}"):
                     delete_client(cid)
                     st.success(f"Client '{client['name']}' supprime.")
                     st.rerun()
