@@ -7,7 +7,19 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 # --- API ---
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# Supporte .env (local) et st.secrets (Streamlit Cloud)
+def _get_secret(key: str) -> str | None:
+    """Recupere une cle API depuis .env ou st.secrets (Streamlit Cloud)."""
+    value = os.getenv(key)
+    if value:
+        return value
+    try:
+        import streamlit as st
+        return st.secrets.get(key)
+    except Exception:
+        return None
+
+GROQ_API_KEY = _get_secret("GROQ_API_KEY")
 
 # --- Modèles ---
 # Modele multilingue : comprend le francais technique (vs all-MiniLM-L6-v2 qui est anglophone)
