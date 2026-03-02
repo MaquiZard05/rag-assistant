@@ -30,12 +30,10 @@ rag-assistant/
 ├── .gitignore
 ├── src/
 │   ├── __init__.py
-│   ├── ingestion.py       # Chargement + chunking + embedding des documents
-│   ├── retriever.py       # Recherche dans la vector store
-│   ├── chain.py           # Chaîne LangChain (retrieval + generation)
-│   ├── config.py          # Configuration centralisée (modèles, params)
-│   └── utils.py           # Fonctions utilitaires
-├── app.py                 # Interface Streamlit (point d'entrée)
+│   ├── config.py          # Configuration centralisée (modèles, params, chemins)
+│   ├── ingest.py          # Script d'ingestion (PDFs → chunks → ChromaDB)
+│   └── query.py           # Script de query RAG (question → réponse sourcée)
+├── app.py                 # Interface Streamlit (point d'entrée) — à créer Jour 2
 ├── data/
 │   ├── raw/               # Documents originaux uploadés
 │   └── chroma_db/         # Base vectorielle ChromaDB (persistante)
@@ -44,7 +42,7 @@ rag-assistant/
 ├── demos/
 │   └── sample_docs/       # Documents de démo pour les prospects
 └── docs/
-    └── notes.md           # Notes de développement
+    └── *.pdf              # PDFs de démo (5 docs Duval & Associés)
 ```
 
 ## Conventions de Code
@@ -92,8 +90,13 @@ rag-assistant/
 - ❌ Ne pas créer des fichiers inutiles (pas de config YAML, pas de Makefile, pas de docker-compose).
 
 ## Roadmap (Référence Rapide)
-- **Jour 1** : Pipeline fonctionnel (ingestion → query → réponse sourcée) ✅
-- **Jour 2** : Qualité des réponses + interface Streamlit
+- **Jour 1** : Pipeline fonctionnel (ingestion → query → réponse sourcée) ✅ TERMINÉ
+  - config.py + ingest.py + query.py fonctionnels
+  - 5 PDFs démo ingérés (33 chunks dans ChromaDB)
+  - Embeddings : sentence-transformers all-MiniLM-L6-v2 (local)
+  - LLM : Groq API (llama-3.1-8b-instant)
+  - Nettoyage technique fait (fichiers vides supprimés, dépendances OK)
+- **Jour 2** : Qualité des réponses + interface Streamlit ⬅️ EN COURS
 - **Jour 3** : Multi-tenant + historique conversation + admin
 - **Jour 4** : Déploiement Streamlit Cloud + démo Loom
 - **Jour 5** : Packaging commercial + outreach
@@ -110,7 +113,14 @@ GROQ_API_KEY=gsk_...
 # Activer l'environnement
 source venv/bin/activate
 
-# Lancer l'app Streamlit
+# Ingestion des PDFs
+python src/ingest.py
+
+# Poser une question (interactif ou en argument)
+python src/query.py
+python src/query.py "Ta question ici"
+
+# Lancer l'app Streamlit (Jour 2+)
 streamlit run app.py
 
 # Installer les dépendances

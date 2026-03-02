@@ -29,25 +29,24 @@
 
 ---
 
-### JOUR 1 (Jeudi) — FONDATIONS + PREMIER PIPELINE
+### JOUR 1 (Jeudi) — FONDATIONS + PREMIER PIPELINE ✅ TERMINÉ
 
 **Matin (9h-12h) — Comprendre et installer**
-- [ ] Installer l'environnement Python (venv dédié au projet RAG)
-- [ ] Installer les dépendances : `langchain`, `chromadb`, `openai`, `streamlit`, `pypdf`
-- [ ] Comprendre le flux : Document → Chunks → Embeddings → Vector Store → Query → Réponse
-- [ ] **Mini-exercice** : charger UN seul PDF et faire une query dessus en 20 lignes de code
+- [x] Installer l'environnement Python (venv dédié au projet RAG)
+- [x] Installer les dépendances : `langchain`, `chromadb`, `sentence-transformers`, `streamlit`, `pypdf`
+- [x] Comprendre le flux : Document → Chunks → Embeddings → Vector Store → Query → Réponse
+- [x] **Mini-exercice** : charger UN seul PDF et faire une query dessus en 20 lignes de code
 
 **Après-midi (14h-18h) — Pipeline complet basique**
-- [ ] Construire le script d'ingestion (charger plusieurs PDFs, les découper, les stocker)
-- [ ] Construire le script de query (poser une question, récupérer les chunks pertinents, générer une réponse)
-- [ ] Tester avec 3-4 documents exemples (procédures, FAQ, doc technique)
-- [ ] **Checkpoint** : Tu peux poser une question et obtenir une réponse sourcée ✅
+- [x] Construire le script d'ingestion (`src/ingest.py` — charge 5 PDFs, découpe en 33 chunks, stocke dans ChromaDB)
+- [x] Construire le script de query (`src/query.py` — question → retrieval top 5 → réponse Groq sourcée)
+- [x] Tester avec 5 documents exemples Duval & Associés (QSE, RH, FAQ, Chantier, Catalogue)
+- [x] **Checkpoint** : Pipeline fonctionnel, réponses sourcées avec fichier + page ✅
 
-**Soirée (20h-22h) — Cowork setup**
-- [ ] Configurer Cowork sur ton desktop (dossier projet dédié)
-- [ ] Lier ton agenda si le connecteur Google Calendar est dispo
-- [ ] Créer les instructions globales Cowork pour ce projet
-- [ ] Préparer le dossier de travail organisé (docs/, src/, demos/, notes/)
+**Soirée (20h-22h) — Nettoyage technique**
+- [x] Suppression des fichiers templates vides (ingestion.py, retriever.py, chain.py, utils.py)
+- [x] Structure src/ propre : config.py + ingest.py + query.py
+- [x] Dépendances stabilisées
 
 **🎓 Ce que tu apprends Jour 1** : Comment un document devient des vecteurs, comment la similarité vectorielle fonctionne (cosine similarity — comme dans ton projet trading), ce qu'est un "chunk" et pourquoi la taille compte.
 
