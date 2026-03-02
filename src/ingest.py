@@ -61,11 +61,20 @@ def get_embeddings():
     return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
 
-def ingest_single_pdf(pdf_path: Path) -> int:
-    """Ingere un seul PDF dans ChromaDB. Retourne le nombre de chunks ajoutes."""
+def ingest_single_pdf(pdf_path: Path, original_name: str = None) -> int:
+    """Ingere un seul PDF dans ChromaDB. Retourne le nombre de chunks ajoutes.
+
+    original_name : nom original du fichier (pour les uploads Streamlit qui
+                    utilisent un fichier temporaire).
+    """
     # Charger le PDF
     loader = PyPDFLoader(str(pdf_path))
     documents = loader.load()
+
+    # Remplacer le chemin temporaire par le vrai nom de fichier
+    if original_name:
+        for doc in documents:
+            doc.metadata["source"] = original_name
 
     # Decouper en chunks
     chunks = split_documents(documents)

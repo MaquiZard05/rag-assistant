@@ -89,7 +89,7 @@ with st.sidebar:
                         tmp_path = Path(tmp.name)
 
                     try:
-                        num_chunks = ingest_single_pdf(tmp_path)
+                        num_chunks = ingest_single_pdf(tmp_path, original_name=uploaded_file.name)
                         st.success(f"{uploaded_file.name} — {num_chunks} chunks indexes")
                         st.session_state[processed_key] = True
                     except Exception as e:
@@ -212,7 +212,7 @@ if prompt := st.chat_input("Posez votre question sur vos documents..."):
                     if sources:
                         with st.expander("📎 Voir les sources"):
                             for src in sources:
-                                score_pct = max(0, 100 - src["score"] * 50)
+                                score_pct = max(0, min(100, 100 - (src["score"] - 8) * 10))
                                 st.markdown(
                                     f'<div class="source-box">📄 <strong>{src["file"]}</strong>, '
                                     f'page {src["page"]} '

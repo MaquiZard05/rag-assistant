@@ -6,7 +6,9 @@ from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
+from langchain_community.retrievers import BM25Retriever
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.documents import Document
 
 from config import (
     GROQ_API_KEY, EMBEDDING_MODEL, LLM_MODEL,
@@ -78,6 +80,51 @@ def display_sources(chunks: list):
             print(f"  - {source}, page {page} (score: {score:.3f})")
 
 
+def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
+    """Recherche hybride : combine vectorielle (sens) + BM25 (mots-cles).
+
+    Retourne les top_k meilleurs resultats en fusionnant les deux methodes.
+    """
+    # 1. Recherche vectorielle (semantique)
+    vector_results = vectorstore.similarity_search_with_score(question, k=top_k * 2)
+
+    # 2. Recherche BM25 (mots-cles) sur tous les documents de la base
+    collection = vectorstore.get()
+    if not collection or not collection.get("documents"):
+        return vector_results[:top_k]
+
+    all_docs = []
+    for i, text in enumerate(collection["documents"]):
+        meta = collection["metadatas"][i] if collection.get("metadatas") else {}
+        all_docs.append(Document(page_content=text, metadata=meta))
+
+    bm25_retriever = BM25Retriever.from_documents(all_docs, k=top_k * 2)
+    bm25_results = bm25_retriever.invoke(question)
+
+    # 3. Fusionner les resultats (Reciprocal Rank Fusion)
+    doc_scores = {}
+    k_rrf = 60  # constante RRF standard
+
+    # Scores des resultats vectoriels
+    for rank, (doc, _score) in enumerate(vector_results):
+        key = doc.page_content[:100]
+        doc_scores[key] = {"doc": doc, "score": 1.0 / (k_rrf + rank + 1), "original_score": _score}
+
+    # Ajouter les scores BM25
+    for rank, doc in enumerate(bm25_results):
+        key = doc.page_content[:100]
+        rrf_score = 1.0 / (k_rrf + rank + 1)
+        if key in doc_scores:
+            doc_scores[key]["score"] += rrf_score
+        else:
+            doc_scores[key] = {"doc": doc, "score": rrf_score, "original_score": 1.0}
+
+    # Trier par score fusionne (plus haut = mieux)
+    sorted_results = sorted(doc_scores.values(), key=lambda x: x["score"], reverse=True)
+
+    return [(r["doc"], r["original_score"]) for r in sorted_results[:top_k]]
+
+
 def ask(question: str, top_k: int = TOP_K) -> dict:
     """Pose une question au RAG. Retourne reponse, sources et scores.
 
@@ -90,7 +137,7 @@ def ask(question: str, top_k: int = TOP_K) -> dict:
         raise FileNotFoundError("Base ChromaDB introuvable. Lance d'abord : python src/ingest.py")
 
     vectorstore = load_vectorstore()
-    chunks = vectorstore.similarity_search_with_score(question, k=top_k)
+    chunks = hybrid_search(vectorstore, question, top_k=top_k)
 
     if not chunks:
         return {"answer": "Aucun resultat trouve dans les documents.", "sources": [], "num_sources": 0}

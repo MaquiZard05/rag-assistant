@@ -10,7 +10,8 @@ load_dotenv(PROJECT_ROOT / ".env")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # --- Modèles ---
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+# Modele multilingue : comprend le francais technique (vs all-MiniLM-L6-v2 qui est anglophone)
+EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 LLM_MODEL = "llama-3.1-8b-instant"
 
 # --- Chemins ---
