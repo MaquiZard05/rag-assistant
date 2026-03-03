@@ -128,7 +128,7 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - Ingestion multi-format : PDF, TXT, DOCX, HTML (loaders LangChain)
   - Interface chat style ChatGPT : sidebar visible, navigation, sélecteur client
   - Cache embeddings (singleton) + accès ChromaDB direct pour stats (navigation instantanée)
-  - Pool hybride search x4 pour meilleur reranking
+  - Pool hybride search x4 pour reranking (remplace par corpus complet au Jour 5)
   - 2 clients demo : Duval BTP (5 docs, 62 chunks) + Pulse Digital (5 docs, 533 chunks)
   - Audit complet J+4 : scorecard C+, 4 correctifs immédiats appliqués
   - Fix sécurité : XSS (html.escape), exceptions loguées, page fallback non-PDF
@@ -143,7 +143,9 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - 6 PDFs BTP demo : DTU, CCTP, QSE, Fiches tech, DOE, Memo (89 chunks)
   - System prompt strict : UNIQUEMENT les documents, JAMAIS de generalites
   - Seuil de pertinence MIN_RELEVANCE_SCORE=0.3 (pas de LLM si rien pertinent)
-  - 7/7 tests valides (6 questions BTP + hors-sujet filtre)
+  - Reranking adaptatif : TOP_K=5 garanti + chunks supplementaires si score >= 2.0, max 10
+  - Recherche corpus complet (vector + BM25 sur 89 chunks) → cross-encoder decide
+  - 5/7 tests valides (6 questions BTP + hors-sujet) — Q4 limite par parsing tableau LLM
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 
