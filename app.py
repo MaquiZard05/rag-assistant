@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 st.set_page_config(
     page_title="Assistant Documentaire IA",
-    page_icon="📄",
+    page_icon=":material/description:",
     layout="centered",
     initial_sidebar_state="expanded",
 )
@@ -60,14 +60,14 @@ if not CHROMA_DIR.exists() or not any(CHROMA_DIR.iterdir()):
 
 # Sidebar navigation
 with st.sidebar:
-    st.markdown("### 📄 Assistant IA")
+    st.markdown("### Assistant IA")
     st.markdown("---")
-    st.page_link("pages/1_Chat.py", label="Chat", icon="💬")
-    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️")
+    st.page_link("pages/1_Chat.py", label="Chat", icon=":material/chat:")
+    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
 
 st.markdown("""
 <div class="app-header">
-    <h1>📄 Assistant Documentaire IA</h1>
+    <h1>Assistant Documentaire IA</h1>
     <p>Posez vos questions, obtenez des reponses sourcees depuis vos documents.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -75,6 +75,6 @@ st.markdown("""
 st.markdown("")
 col1, col2 = st.columns(2)
 with col1:
-    st.page_link("pages/1_Chat.py", label="Ouvrir le Chat", icon="💬", use_container_width=True)
+    st.page_link("pages/1_Chat.py", label="Ouvrir le Chat", icon=":material/chat:", use_container_width=True)
 with col2:
-    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️", use_container_width=True)
+    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:", use_container_width=True)

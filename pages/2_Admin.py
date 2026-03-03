@@ -19,7 +19,7 @@ from ingest import ingest_single_file
 # --- Configuration ---
 st.set_page_config(
     page_title="Admin — Assistant Documentaire IA",
-    page_icon="⚙️",
+    page_icon=":material/settings:",
     layout="centered",
     initial_sidebar_state="expanded",
 )
@@ -56,11 +56,11 @@ def render_metric(value, label):
 
 # --- Sidebar navigation ---
 with st.sidebar:
-    st.markdown("### ⚙️ Administration")
+    st.markdown("### Administration")
     st.caption("Gestion clients, documents, parametres")
     st.markdown("---")
-    st.page_link("pages/1_Chat.py", label="Retour au Chat", icon="💬")
-    st.page_link("app.py", label="Accueil", icon="🏠")
+    st.page_link("pages/1_Chat.py", label="Retour au Chat", icon=":material/chat:")
+    st.page_link("app.py", label="Accueil", icon=":material/home:")
 
 # --- Header ---
 render_header("Administration", "Gerez vos clients, documents et parametres")
@@ -116,7 +116,7 @@ st.markdown("---")
 for cid, client in clients.items():
     stats = all_stats.get(cid, {"num_docs": 0, "num_chunks": 0, "files": []})
 
-    with st.expander(f"📂 {client['name']} — {stats['num_docs']} doc(s), {stats['num_chunks']} chunks"):
+    with st.expander(f"{client['name']} — {stats['num_docs']} doc(s), {stats['num_chunks']} chunks"):
 
         # Upload de documents pour ce client
         st.markdown("**Ajouter des documents**")
@@ -157,7 +157,7 @@ for cid, client in clients.items():
             for filename in stats["files"]:
                 col_file, col_btn = st.columns([4, 1])
                 with col_file:
-                    st.markdown(f"📄 {filename}")
+                    st.markdown(f"{filename}")
                 with col_btn:
                     if st.button("Supprimer", key=f"del_doc_{cid}_{filename}"):
                         deleted = delete_document(cid, filename)

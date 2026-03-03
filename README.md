@@ -4,12 +4,16 @@ Un assistant IA qui repond aux questions de vos equipes en s'appuyant sur vos pr
 
 ## Fonctionnalites
 
-- **Upload de documents PDF** avec indexation automatique (drag & drop)
-- **Recherche intelligente** dans vos documents (base vectorielle ChromaDB)
-- **Reponses sourcees** avec nom du fichier et numero de page
-- **Indicateur de confiance** (nombre de sources trouvees)
-- **Interface web professionnelle** avec Streamlit
-- **Chunking optimise** (500 tokens, overlap 100 — teste scientifiquement)
+- **Upload de documents** (PDF, TXT, DOCX, HTML) avec indexation automatique
+- **Recherche hybride** : vectorielle (sens) + BM25 (mots-cles) + reranking cross-encoder
+- **Reponses sourcees** avec nom du fichier, numero de page et score de pertinence
+- **Indicateur de confiance** (base sur le score de reranking)
+- **Multi-client** : espaces de travail isoles par client (collection ChromaDB separee)
+- **Historique conversation** : reformulation automatique des questions avec contexte
+- **System prompt personnalisable** par client
+- **Panneau admin** : gestion clients, documents, prompts
+- **Interface web professionnelle** style ChatGPT (Streamlit)
+- **Deploiement** Streamlit Cloud (gratuit)
 
 ## Installation
 
@@ -42,21 +46,19 @@ Obtenir une cle gratuite sur [console.groq.com](https://console.groq.com).
 # Activer l'environnement
 source venv/bin/activate
 
-# Indexer les documents (premiere fois ou apres ajout de PDFs dans docs/)
-python src/ingest.py
-
 # Lancer l'interface web
 streamlit run app.py
 ```
 
-L'application s'ouvre sur `http://localhost:8501`.
+L'application s'ouvre sur `http://localhost:8501`. Les documents de demo sont indexes automatiquement au premier lancement.
 
 ## Utilisation
 
-1. **Deposez vos PDFs** dans la sidebar (indexation automatique)
-2. **Posez vos questions** dans la barre de chat
-3. **Consultez les sources** citees avec chaque reponse
-4. L'indicateur de confiance vous dit si la reponse est fiable
+1. **Selectionnez un client** dans la sidebar (espace de travail)
+2. **Deposez vos documents** via le panneau Administration (PDF, TXT, DOCX, HTML)
+3. **Posez vos questions** dans la barre de chat
+4. **Consultez les sources** citees avec chaque reponse
+5. L'indicateur de confiance vous dit si la reponse est fiable
 
 ## Stack technique
 
@@ -67,21 +69,38 @@ L'application s'ouvre sur `http://localhost:8501`.
 | Base vectorielle | ChromaDB (locale, gratuite) |
 | LLM | Groq API (Llama 3, gratuit) |
 | Embeddings | HuggingFace sentence-transformers (local) |
+| Reranking | Cross-encoder ms-marco-MiniLM-L-6-v2 |
 | Interface | Streamlit |
+| Deploiement | Streamlit Cloud |
 
 ## Structure du projet
 
 ```
 rag-assistant/
-├── app.py                 # Interface Streamlit
+├── app.py                 # Point d'entree Streamlit (CSS + auto-ingest)
+├── pages/
+│   ├── 1_Chat.py          # Interface chat RAG (historique + sources)
+│   └── 2_Admin.py         # Panneau admin (clients, docs, prompts)
 ├── src/
 │   ├── config.py          # Configuration centralisee
-│   ├── ingest.py          # Ingestion PDFs → ChromaDB
-│   └── query.py           # Pipeline RAG (question → reponse)
-├── docs/                  # PDFs a indexer
-├── data/chroma_db/        # Base vectorielle (generee)
+│   ├── clients.py         # CRUD clients multi-tenant
+│   ├── ingest.py          # Ingestion multi-format → ChromaDB
+│   └── query.py           # Pipeline RAG (hybride → rerank → LLM)
+├── styles/
+│   └── main.css           # Design system (DM Sans, dark sidebar)
+├── data/
+│   ├── clients.json       # Config clients
+│   └── chroma_db/         # Base vectorielle (generee)
+├── docs/                  # Documents de demo
 └── tests/
-    └── compare_chunks.py  # Script de comparaison de tailles de chunks
+    └── compare_chunks.py  # Script de test chunking
+```
+
+## Pipeline RAG
+
+```
+Question → Reformulation (historique) → Recherche hybride (vectorielle + BM25)
+→ Fusion RRF → Reranking cross-encoder → Generation LLM → Reponse sourcee
 ```
 
 ## Licence

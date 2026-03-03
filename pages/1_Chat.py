@@ -17,7 +17,7 @@ from clients import list_clients
 # --- Configuration ---
 st.set_page_config(
     page_title="Chat — Assistant Documentaire IA",
-    page_icon="💬",
+    page_icon=":material/chat:",
     layout="centered",
     initial_sidebar_state="expanded",
 )
@@ -71,7 +71,7 @@ if "messages" not in st.session_state:
 
 # --- Sidebar style ChatGPT ---
 with st.sidebar:
-    st.markdown("### 💬 Assistant IA")
+    st.markdown("### Assistant IA")
     st.caption("Posez vos questions sur vos documents")
 
     st.markdown("---")
@@ -97,7 +97,7 @@ with st.sidebar:
         st.session_state.active_client = active_client_id
 
     # Bouton nouvelle conversation
-    if st.button("🗑 Nouvelle conversation", use_container_width=True):
+    if st.button("Nouvelle conversation", icon=":material/add:", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -108,11 +108,16 @@ with st.sidebar:
     st.markdown(f"**{len(indexed_files)} document(s)** indexes")
     if indexed_files:
         for f in indexed_files:
-            st.markdown(f'<div class="sidebar-doc-name">📄 {escape(f)}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="sidebar-doc-name">'
+                f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+                f'{escape(f)}</div>',
+                unsafe_allow_html=True,
+            )
 
     st.markdown("---")
-    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️")
-    st.page_link("app.py", label="Accueil", icon="🏠")
+    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
+    st.page_link("app.py", label="Accueil", icon=":material/home:")
 
 
 # --- Zone de chat principale ---
@@ -121,7 +126,7 @@ with st.sidebar:
 if not st.session_state.messages:
     st.markdown(f"""
     <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
-        <h2 style="color: #1a1a2e; font-weight: 600;">Bonjour 👋</h2>
+        <h2 style="color: #1a1a2e; font-weight: 600;">Bonjour</h2>
         <p style="font-size: 1.05rem; max-width: 500px; margin: 0.5rem auto;">
             Posez une question sur les documents de <strong>{escape(active_client['name'])}</strong>
         </p>
@@ -130,8 +135,7 @@ if not st.session_state.messages:
 
 # Historique
 for message in st.session_state.messages:
-    avatar = "👤" if message["role"] == "user" else "🤖"
-    with st.chat_message(message["role"], avatar=avatar):
+    with st.chat_message(message["role"]):
         st.markdown(message["content"])
         if message["role"] == "assistant" and "sources" in message:
             render_sources(message["sources"])
@@ -139,12 +143,12 @@ for message in st.session_state.messages:
 # --- Input ---
 if prompt := st.chat_input("Posez votre question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="👤"):
+    with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant", avatar="🤖"):
+    with st.chat_message("assistant"):
         if not indexed_files:
-            msg = "Aucun document disponible. Rendez-vous sur la page **⚙️ Administration** pour en ajouter."
+            msg = "Aucun document disponible. Rendez-vous sur la page **Administration** pour en ajouter."
             st.markdown(msg)
             st.session_state.messages.append({"role": "assistant", "content": msg})
         else:
