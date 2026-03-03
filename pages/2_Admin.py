@@ -18,7 +18,7 @@ from ingest import ingest_single_file
 
 # --- Configuration ---
 st.set_page_config(
-    page_title="Admin — Assistant Documentaire IA",
+    page_title="Admin — Assistant BTP",
     page_icon=":material/settings:",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -56,8 +56,15 @@ def render_metric(value, label):
 
 # --- Sidebar navigation ---
 with st.sidebar:
-    st.markdown("### Administration")
-    st.caption("Gestion clients, documents, parametres")
+    st.markdown('''
+    <div class="btp-logo">
+        <div class="btp-logo-icon">B</div>
+        <div class="btp-logo-text">
+            <span class="btp-logo-title">Assistant BTP</span>
+            <span class="btp-logo-sub">Intelligence documentaire</span>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
     st.markdown("---")
     st.page_link("pages/1_Chat.py", label="Retour au Chat", icon=":material/chat:")
     st.page_link("app.py", label="Accueil", icon=":material/home:")

@@ -1,4 +1,4 @@
-"""Page Chat — Interface RAG style ChatGPT. Sidebar toujours visible."""
+"""Page Chat — Assistant BTP. Sidebar categories, questions suggerees, sources detaillees."""
 
 import sys
 from html import escape
@@ -16,7 +16,7 @@ from clients import list_clients
 
 # --- Configuration ---
 st.set_page_config(
-    page_title="Chat — Assistant Documentaire IA",
+    page_title="Chat — Assistant BTP",
     page_icon=":material/chat:",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -33,50 +33,80 @@ def load_css(css_file: str):
 load_css("styles/main.css")
 
 
-def get_confidence(sources):
-    """Confiance basee sur le meilleur score de reranking."""
-    if not sources:
-        return "confidence-low", "Confiance faible"
-    best_score = max(s["score"] for s in sources)
-    if best_score > 4:
-        return "confidence-high", "Confiance elevee"
-    elif best_score > 1:
-        return "confidence-medium", "Confiance moyenne"
-    else:
-        return "confidence-low", "Confiance faible"
+# --- Categories BTP ---
+BTP_CATEGORIES = [
+    {"icon": "straighten", "label": "Normes & DTU", "key": "normes"},
+    {"icon": "description", "label": "CCTP / CCAP", "key": "cctp"},
+    {"icon": "health_and_safety", "label": "QSE / PPSPS", "key": "qse"},
+    {"icon": "build", "label": "Fiches techniques", "key": "fiches"},
+    {"icon": "folder", "label": "DOE / PV reception", "key": "doe"},
+    {"icon": "article", "label": "Administratif", "key": "admin"},
+]
+
+SUGGESTED_QUESTIONS = [
+    {"cat": "Normes & DTU", "q": "Quel DTU s'applique pour l'isolation thermique par l'exterieur ?"},
+    {"cat": "QSE / PPSPS", "q": "Quelles sont les obligations du PPSPS pour un chantier > 500 000 EUR ?"},
+    {"cat": "CCTP / CCAP", "q": "Quels sont les delais d'execution prevus au lot gros oeuvre du CCTP ?"},
+    {"cat": "Fiches techniques", "q": "Quelle est la resistance thermique du Knauf TH38 en 120mm ?"},
+    {"cat": "QSE / PPSPS", "q": "Procedure en cas d'accident sur chantier — quelles etapes immediates ?"},
+    {"cat": "DOE", "q": "Quels documents sont exiges dans le DOE pour la reception ?"},
+]
 
 
 def render_sources(sources):
-    confidence_class, confidence_label = get_confidence(sources)
-    st.markdown(
-        f'<span class="{confidence_class}">{confidence_label} — {len(sources)} source(s)</span>',
-        unsafe_allow_html=True,
-    )
-    if sources:
-        with st.expander("Voir les sources"):
-            for src in sources:
-                score_pct = min(100, max(0, src["score"] * 10))
-                page_info = f", page {src['page']}" if src.get("page") is not None else ""
-                st.markdown(
-                    f'<div class="source-box"><strong>{escape(src["file"])}</strong>'
-                    f'{page_info} '
-                    f'<em>(pertinence : {score_pct:.0f}%)</em></div>',
-                    unsafe_allow_html=True,
-                )
+    """Affiche les sources dans un bloc monospace style terminal."""
+    if not sources:
+        return
+
+    rows_html = ""
+    for src in sources:
+        score_pct = min(100, max(0, src["score"] * 10))
+        page_info = f"p.{src['page']}" if src.get("page") is not None else ""
+
+        if score_pct >= 90:
+            score_class = "score-high"
+        elif score_pct >= 80:
+            score_class = "score-medium"
+        else:
+            score_class = "score-low"
+
+        rows_html += f'''
+        <div class="source-row">
+            <span class="source-file">{escape(src["file"])}</span>
+            <span class="source-page">{page_info}</span>
+            <span class="source-score {score_class}">{score_pct:.0f}%</span>
+        </div>'''
+
+    st.markdown(f'''
+    <div class="sources-block">
+        <div class="sources-header">Sources ({len(sources)})</div>
+        {rows_html}
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 # --- Initialisation session ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "active_category" not in st.session_state:
+    st.session_state.active_category = None
 
-# --- Sidebar style ChatGPT ---
+# --- Sidebar BTP ---
 with st.sidebar:
-    st.markdown("### Assistant IA")
-    st.caption("Posez vos questions sur vos documents")
+    # Logo
+    st.markdown('''
+    <div class="btp-logo">
+        <div class="btp-logo-icon">B</div>
+        <div class="btp-logo-text">
+            <span class="btp-logo-title">Assistant BTP</span>
+            <span class="btp-logo-sub">Intelligence documentaire</span>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Selecteur de client (= espace de travail)
+    # Selecteur de client
     clients = list_clients()
     client_ids = list(clients.keys())
     client_names = [clients[cid]["name"] for cid in client_ids]
@@ -96,44 +126,92 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.active_client = active_client_id
 
+    # Metriques sidebar
+    indexed_files = get_indexed_files(collection_name=active_client_id)
+    st.markdown(f'''
+    <div class="sidebar-metrics">
+        <div class="sidebar-metric">
+            <div class="sidebar-metric-value">{len(indexed_files)}</div>
+            <div class="sidebar-metric-label">Documents</div>
+        </div>
+        <div class="sidebar-metric">
+            <div class="sidebar-metric-value">{len(BTP_CATEGORIES)}</div>
+            <div class="sidebar-metric-label">Categories</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Categories BTP
+    st.markdown('<div class="sidebar-section-label">Base documentaire</div>', unsafe_allow_html=True)
+
+    for cat in BTP_CATEGORIES:
+        if st.button(
+            f":{cat['icon']}: {cat['label']}",
+            key=f"cat_{cat['key']}",
+            use_container_width=True,
+        ):
+            st.session_state.active_category = cat["label"]
+
+    st.markdown("---")
+
     # Bouton nouvelle conversation
     if st.button("Nouvelle conversation", icon=":material/add:", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.active_category = None
         st.rerun()
 
     st.markdown("---")
 
-    # Stats rapides
-    indexed_files = get_indexed_files(collection_name=active_client_id)
-    st.markdown(f"**{len(indexed_files)} document(s)** indexes")
-    if indexed_files:
-        for f in indexed_files:
-            st.markdown(
-                f'<div class="sidebar-doc-name">'
-                f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
-                f'{escape(f)}</div>',
-                unsafe_allow_html=True,
-            )
-
-    st.markdown("---")
+    # Navigation
     st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
     st.page_link("app.py", label="Accueil", icon=":material/home:")
 
 
-# --- Zone de chat principale ---
-
-# Message d'accueil si conversation vide
-if not st.session_state.messages:
-    st.markdown(f"""
-    <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
-        <h2 style="color: #1a1a2e; font-weight: 600;">Bonjour</h2>
-        <p style="font-size: 1.05rem; max-width: 500px; margin: 0.5rem auto;">
-            Posez une question sur les documents de <strong>{escape(active_client['name'])}</strong>
-        </p>
+# --- Header zone chat ---
+active_cat_label = st.session_state.active_category or "Tous les documents"
+st.markdown(f'''
+<div class="chat-header">
+    <div class="chat-header-left">
+        <span class="chat-header-title">{escape(active_cat_label)}</span>
+        <span class="chat-header-sub">Recherche hybride (vectorielle + BM25 + reranking)</span>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="chat-header-status">Systeme actif</div>
+</div>
+''', unsafe_allow_html=True)
 
-# Historique
+
+# --- Ecran d'accueil (pas de messages) ---
+if not st.session_state.messages:
+    st.markdown(f'''
+    <div class="welcome-screen">
+        <div class="welcome-logo">B</div>
+        <div class="welcome-title">Assistant documentaire BTP</div>
+        <div class="welcome-subtitle">
+            Posez une question sur les documents de {escape(active_client["name"])} —
+            normes, CCTP, procedures QSE, fiches techniques.
+            Reponses sourcees avec score de fiabilite.
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # Grille de questions suggerees
+    cols = st.columns(2)
+    for i, sq in enumerate(SUGGESTED_QUESTIONS):
+        with cols[i % 2]:
+            # Utiliser un bouton Streamlit avec le texte de la question
+            if st.button(
+                sq["q"],
+                key=f"suggest_{i}",
+                use_container_width=True,
+                help=sq["cat"],
+            ):
+                st.session_state.messages.append({"role": "user", "content": sq["q"]})
+                st.rerun()
+
+
+# --- Historique ---
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -185,3 +263,9 @@ if prompt := st.chat_input("Posez votre question..."):
                 error_msg = f"Erreur : {e}"
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
+
+# Disclaimer
+st.markdown(
+    '<div class="chat-disclaimer">Reponses generees a partir de vos documents internes — Sources citees systematiquement</div>',
+    unsafe_allow_html=True,
+)

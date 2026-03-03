@@ -1,109 +1,578 @@
 /* ============================================
-   RAG ASSISTANT — DESIGN SYSTEM 2026
-   Interface style ChatGPT / Claude
+   ASSISTANT BTP — DESIGN SYSTEM
+   Dark theme industrie / chantier
    ============================================ */
 
-/* === RESET STREAMLIT DEFAULTS === */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-/* Masquer la navigation par defaut de Streamlit */
-[data-testid="stSidebarNav"] {display: none !important;}
+/* === FONTS === */
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* === TYPOGRAPHIE === */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+/* === VARIABLES === */
+:root {
+    /* Backgrounds */
+    --bg-primary: #1A1B1E;
+    --bg-sidebar: #141517;
+    --bg-card: #1E1F22;
+    --bg-card-hover: #222326;
+    --bg-accent: #2A2520;
 
-/* === APP GLOBAL === */
-.stApp {
-    background-color: #f7f7f8;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #1a1a2e;
+    /* Borders */
+    --border-default: #2A2B2E;
+    --border-active: #3D3529;
+
+    /* Accent — orange chantier */
+    --accent: #E8A23A;
+    --accent-dark: #D4891A;
+    --accent-gradient: linear-gradient(135deg, #E8A23A 0%, #D4891A 100%);
+
+    /* Texte */
+    --text-primary: #F5F0E8;
+    --text-secondary: #A09A8E;
+    --text-tertiary: #6B6860;
+    --text-muted: #4A4740;
+    --text-disabled: #3D3529;
+
+    /* Scores */
+    --score-high: #16a34a;
+    --score-medium: #ca8a04;
+    --score-low: #dc2626;
+
+    /* Fonts */
+    --font-body: 'Source Sans 3', 'Source Sans Pro', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* === SIDEBAR — Style ChatGPT === */
+/* === RESET STREAMLIT === */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+[data-testid="stSidebarNav"] {display: none !important;}
+
+/* === APP GLOBAL === */
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background-color: var(--bg-primary);
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+}
+
+h1, h2, h3 {
+    color: var(--text-primary) !important;
+    font-family: var(--font-body);
+}
+
+/* === SIDEBAR === */
 [data-testid="stSidebar"] {
-    background-color: #171717;
-    border-right: 1px solid rgba(255,255,255,0.08);
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-default);
 }
 
 [data-testid="stSidebar"] * {
-    color: #ececec !important;
+    color: var(--text-secondary) !important;
 }
 
 [data-testid="stSidebar"] h3 {
-    font-size: 1.1rem !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
     font-weight: 600 !important;
     margin-bottom: 0 !important;
 }
 
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stMultiSelect label {
-    color: #8b949e !important;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+[data-testid="stSidebar"] hr {
+    border-color: var(--border-default) !important;
+    margin: 0.6rem 0 !important;
 }
 
-/* Selectbox dans sidebar — fond sombre */
+/* Selectbox sidebar */
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-    background-color: #2a2a2a !important;
-    border-color: #404040 !important;
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-default) !important;
     border-radius: 8px !important;
+    cursor: pointer !important;
 }
 
-/* Boutons dans sidebar */
+[data-testid="stSidebar"] .stSelectbox label {
+    color: var(--text-tertiary) !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Boutons sidebar */
 [data-testid="stSidebar"] .stButton > button {
-    background-color: #2a2a2a !important;
-    color: #ececec !important;
-    border: 1px solid #404040 !important;
+    background-color: var(--bg-card) !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-default) !important;
     border-radius: 8px !important;
     box-shadow: none !important;
     font-weight: 500 !important;
+    font-family: var(--font-body) !important;
+    transition: all 0.15s ease !important;
 }
 
 [data-testid="stSidebar"] .stButton > button:hover {
-    background-color: #3a3a3a !important;
-    border-color: #555 !important;
-    transform: none !important;
+    background-color: var(--bg-card-hover) !important;
+    border-color: var(--border-active) !important;
 }
 
-/* Liens de page dans sidebar */
+/* Liens page sidebar */
 [data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"] {
     border-radius: 8px !important;
     padding: 0.4rem 0.6rem !important;
 }
 
 [data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"]:hover {
-    background-color: #2a2a2a !important;
+    background-color: var(--bg-card) !important;
 }
 
-/* Dividers dans sidebar */
-[data-testid="stSidebar"] hr {
-    border-color: #333 !important;
-    margin: 0.8rem 0 !important;
+/* Logo BTP sidebar */
+.btp-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.3rem 0;
 }
 
-/* Curseur pointer sur les selectbox */
-[data-testid="stSelectbox"] > div > div {
-    cursor: pointer !important;
+.btp-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #E8A23A 0%, #D4891A 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1A1B1E !important;
+    flex-shrink: 0;
 }
 
-/* Noms de documents dans la sidebar */
+.btp-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.btp-logo-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary) !important;
+}
+
+.btp-logo-sub {
+    font-size: 0.7rem;
+    color: var(--text-tertiary) !important;
+}
+
+/* Sidebar catégorie bouton */
+.sidebar-cat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.sidebar-cat-btn:hover {
+    background-color: var(--bg-card);
+}
+
+.sidebar-cat-count {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+}
+
+/* Sidebar métriques */
+.sidebar-metrics {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.sidebar-metric {
+    flex: 1;
+    text-align: center;
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 0.5rem 0.3rem;
+    border: 1px solid var(--border-default);
+}
+
+.sidebar-metric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent) !important;
+    font-family: var(--font-mono);
+}
+
+.sidebar-metric-label {
+    font-size: 0.65rem;
+    color: var(--text-tertiary) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Sidebar section label */
+.sidebar-section-label {
+    font-size: 0.65rem;
+    color: var(--text-muted) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    padding: 0.4rem 0 0.2rem;
+}
+
+/* Sidebar doc name */
 .sidebar-doc-name {
-    font-size: 0.82rem;
-    color: #8b949e;
-    padding: 0.15rem 0;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    padding: 0.1rem 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* === CUSTOM HEADER (pages non-chat) === */
+/* === CHAT AREA === */
+
+/* Chat header bar */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.chat-header-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary) !important;
+}
+
+.chat-header-sub {
+    font-size: 0.7rem;
+    color: var(--text-tertiary) !important;
+}
+
+.chat-header-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--score-high);
+}
+
+.chat-header-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--score-high);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Messages */
+[data-testid="stChatMessage"] {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
+    color: var(--text-secondary) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* Chat input */
+[data-testid="stChatInput"] textarea,
+.stChatInputContainer textarea {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-default) !important;
+    border-radius: 12px !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.95rem !important;
+}
+
+[data-testid="stChatInput"] textarea:focus,
+.stChatInputContainer textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 1px var(--accent) !important;
+}
+
+/* Disclaimer */
+.chat-disclaimer {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-disabled);
+    padding: 0.3rem 0 0;
+}
+
+/* === WELCOME SCREEN === */
+.welcome-screen {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.welcome-logo {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #E8A23A 0%, #D4891A 100%);
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #1A1B1E;
+    margin-bottom: 1rem;
+}
+
+.welcome-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.4rem;
+}
+
+.welcome-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.5;
+}
+
+/* Questions suggérées */
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+.suggestion-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.suggestion-card:hover {
+    border-color: var(--border-active);
+    background: var(--bg-card-hover);
+}
+
+.suggestion-cat {
+    font-size: 0.7rem;
+    color: var(--accent) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+}
+
+.suggestion-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* === SOURCES BLOCK === */
+.sources-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin-top: 0.8rem;
+}
+
+.sources-header {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.source-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+.source-file {
+    color: var(--text-secondary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.source-page {
+    color: var(--text-muted);
+    margin: 0 1rem;
+    flex-shrink: 0;
+}
+
+.source-score {
+    font-weight: 600;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.score-high {
+    color: var(--score-high);
+    background: rgba(22, 163, 74, 0.12);
+}
+
+.score-medium {
+    color: var(--score-medium);
+    background: rgba(202, 138, 4, 0.12);
+}
+
+.score-low {
+    color: var(--score-low);
+    background: rgba(220, 38, 38, 0.12);
+}
+
+/* === CONFIDENCE BADGES (compat) === */
+.confidence-high {
+    display: inline-block;
+    color: var(--score-high);
+    background: rgba(22, 163, 74, 0.12);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.confidence-medium {
+    display: inline-block;
+    color: var(--score-medium);
+    background: rgba(202, 138, 4, 0.12);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.confidence-low {
+    display: inline-block;
+    color: var(--score-low);
+    background: rgba(220, 38, 38, 0.12);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* === BUTTONS (main area) === */
+.stButton > button {
+    background: var(--accent-gradient);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.stButton > button:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 2px 8px rgba(232, 162, 58, 0.2);
+}
+
+/* === FILE UPLOADER === */
+[data-testid="stFileUploader"] {
+    border: 1px dashed var(--border-active);
+    border-radius: 10px;
+    padding: 0.8rem;
+    background-color: var(--bg-card);
+    transition: all 0.2s ease;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--accent);
+    background-color: var(--bg-card-hover);
+}
+
+/* === EXPANDERS === */
+.streamlit-expanderHeader {
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* === METRIC CARDS (Admin) === */
+.metric-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-default);
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.metric-card:hover {
+    border-color: var(--border-active);
+}
+
+.metric-card h3 {
+    color: var(--accent) !important;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin: 0;
+}
+
+.metric-card p {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    margin: 0.3rem 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+/* === APP HEADER (pages non-chat) === */
 .app-header {
-    background: #171717;
+    background: var(--bg-card);
     padding: 1.5rem 2rem;
     border-radius: 12px;
     margin-bottom: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-default);
     position: relative;
     overflow: hidden;
 }
@@ -115,180 +584,20 @@ footer {visibility: hidden;}
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #10a37f, #3b82f6, #10a37f);
-    background-size: 200% 100%;
-    animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    background: var(--accent-gradient);
 }
 
 .app-header h1 {
     margin: 0;
     font-size: 1.3rem;
-    font-weight: 600;
-    color: #ffffff;
+    font-weight: 700;
+    color: var(--text-primary);
 }
 
 .app-header p {
     margin: 0.3rem 0 0;
-    color: #8b949e;
+    color: var(--text-tertiary);
     font-size: 0.85rem;
-}
-
-/* === CHAT AREA === */
-
-/* Messages container — centrer et aerer */
-[data-testid="stChatMessage"] {
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.5rem;
-    border: none;
-    max-width: 100%;
-}
-
-/* User messages */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background-color: #f7f7f8;
-}
-
-/* Assistant messages — fond blanc, leger relief */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-    background-color: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-/* Chat input */
-[data-testid="stChatInput"] textarea {
-    border: 1px solid #d9d9e3 !important;
-    border-radius: 12px !important;
-    padding: 0.9rem 1.2rem !important;
-    font-size: 0.95rem !important;
-    background: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-[data-testid="stChatInput"] textarea:focus {
-    border-color: #10a37f !important;
-    box-shadow: 0 2px 12px rgba(16, 163, 127, 0.1) !important;
-}
-
-/* === BUTTONS === */
-.stButton > button {
-    background-color: #1a1a2e;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1.2rem;
-    font-weight: 500;
-    font-size: 0.875rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.15s ease;
-    cursor: pointer;
-}
-
-.stButton > button:hover {
-    background-color: #2d2d44;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* === FILE UPLOADER === */
-[data-testid="stFileUploader"] {
-    border: 2px dashed #d1d5db;
-    border-radius: 12px;
-    padding: 1rem;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-}
-
-[data-testid="stFileUploader"]:hover {
-    border-color: #10a37f;
-    background-color: #f0fdf9;
-}
-
-/* === EXPANDERS === */
-.streamlit-expanderHeader {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #4b5563;
-}
-
-/* === CONFIDENCE BADGES === */
-.confidence-high {
-    display: inline-block;
-    color: #059669;
-    background: #ecfdf5;
-    padding: 0.2rem 0.7rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-.confidence-medium {
-    display: inline-block;
-    color: #d97706;
-    background: #fffbeb;
-    padding: 0.2rem 0.7rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-.confidence-low {
-    display: inline-block;
-    color: #dc2626;
-    background: #fef2f2;
-    padding: 0.2rem 0.7rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-/* === SOURCE BOX === */
-.source-box {
-    background-color: #f8f9fa;
-    border-left: 3px solid #10a37f;
-    padding: 8px 12px;
-    margin: 4px 0;
-    border-radius: 0 8px 8px 0;
-    font-size: 0.85rem;
-    color: #4b5563;
-}
-
-/* === METRIC CARDS (Admin) === */
-.metric-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e5e7eb;
-    text-align: center;
-    transition: box-shadow 0.2s ease;
-}
-
-.metric-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.metric-card h3 {
-    color: #1a1a2e;
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.metric-card p {
-    color: #6b7280;
-    font-size: 0.8rem;
-    margin: 0.3rem 0 0;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 500;
 }
 
 /* === TYPING INDICATOR === */
@@ -306,13 +615,40 @@ footer {visibility: hidden;}
 .typing-indicator span {
     width: 8px;
     height: 8px;
-    background: #10a37f;
+    background: var(--accent);
     border-radius: 50%;
     animation: typingPulse 1.4s infinite;
 }
 
 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+/* === SELECTBOX CURSOR === */
+[data-testid="stSelectbox"] > div > div {
+    cursor: pointer !important;
+}
+
+/* === FORMS (Admin) === */
+[data-testid="stForm"] {
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Text inputs */
+.stTextInput input,
+.stTextArea textarea {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-default) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px !important;
+}
+
+.stTextInput input:focus,
+.stTextArea textarea:focus {
+    border-color: var(--accent) !important;
+}
 
 /* === SCROLLBAR === */
 ::-webkit-scrollbar {
@@ -324,10 +660,10 @@ footer {visibility: hidden;}
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: var(--border-default);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: var(--text-muted);
 }
