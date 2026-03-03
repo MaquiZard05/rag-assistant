@@ -52,6 +52,31 @@ footer {visibility: hidden;}
     background-color: transparent !important;
 }
 
+/* Bouton pour rouvrir la sidebar quand elle est fermee */
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+button[kind="headerNoPadding"],
+[data-testid="stHeader"] button {
+    visibility: visible !important;
+    display: flex !important;
+    color: var(--accent) !important;
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-default) !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+}
+
+[data-testid="collapsedControl"] svg,
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="stHeader"] button svg {
+    fill: var(--accent) !important;
+    stroke: var(--accent) !important;
+    color: var(--accent) !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
 /* === APP GLOBAL — aucun fond blanc nulle part === */
 .stApp,
 [data-testid="stAppViewContainer"],
