@@ -173,6 +173,7 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
 ## Variables d'Environnement Requises (.env)
 ```
 GROQ_API_KEY=gsk_...
+ADMIN_PASSWORD=...          # Optionnel — protege la page Admin (si absent, acces libre)
 ```
 
 ## Commandes Utiles

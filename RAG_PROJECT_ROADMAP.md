@@ -63,25 +63,34 @@
 
 ---
 
-### JOUR 5 — PACKAGING COMMERCIAL + OUTREACH ⬅️ PROCHAIN
+### JOUR 5 — PIVOT BTP + AUDIT + CORRECTIONS ⬅️ EN COURS
 
-**Matin — Offre commerciale**
-- [ ] Definir l'offre :
-  - **Starter** (500-800EUR) : RAG sur vos docs, interface chat, 1 collection, setup inclus
-  - **Pro** (1000-1500EUR) : Multi-collections, personnalisation, formation equipe, support 1 mois
-  - **Maintenance** (200-300EUR/mois) : Mises a jour, ajout de docs, support
-- [ ] Rediger un one-pager commercial (PDF propre)
-- [ ] Preparer 3 templates de messages de prospection (email, LinkedIn, DM)
+**Pivot BTP**
+- [x] Verticalisation "Assistant conformite chantier BTP"
+- [x] Dark theme industrie (orange chantier #E8A23A, Source Sans 3)
+- [x] Sidebar BTP : 6 categories (Normes, CCTP, QSE, Fiches, DOE, Admin)
+- [x] 6 PDFs BTP demo (DTU, CCTP, QSE, Fiches tech, DOE, Memo — 89 chunks)
+- [x] Filtrage par categorie BTP fonctionnel (query.py + sidebar)
+- [x] 10/10 tests pytest filtrage categories
 
-**Apres-midi — Premier outreach**
-- [ ] Identifier 20 prospects (agences, cabinets conseil, PME tech)
-- [ ] Envoyer les 10 premiers messages personnalises
-- [ ] S'inscrire sur Malt / plateformes freelance avec offre RAG
-- [ ] Poster dans des communautes tech (Discord IA, forums freelance)
+**Audit complet (agent team : 3 agents paralleles)**
+- [x] Audit securite : 15 findings (score 4/10)
+- [x] Audit performance : 10 findings (score 3/10)
+- [x] Audit UX : 14 findings (score 5/10)
+- [x] Rapport consolide : notes/audit/RAPPORT_AUDIT.md
 
-**Soir — Bilan et suite**
-- [ ] Bilan des 5 jours
-- [ ] Planifier la Semaine 2
+**Corrections Top 5 (agent team : 3 agents paralleles)**
+- [x] Pre-filtrage reranker : candidate_pool = top_k*4 (-80% latence a 500 chunks)
+- [x] Mot de passe Admin (ADMIN_PASSWORD env/secrets)
+- [x] Validation regex client_id + sanitisation filenames
+- [x] Jargon retire du header + "chunks" → "sections"
+- [x] Limite upload 50 MB
+
+**Packaging commercial (restant)**
+- [ ] Definir l'offre Starter/Pro/Maintenance
+- [ ] Rediger un one-pager commercial
+- [ ] Preparer templates de prospection
+- [ ] Premier outreach (20 prospects)
 
 ---
 
@@ -125,7 +134,7 @@ Question utilisateur
 | J2 | Interface Streamlit utilisable par un non-tech | ✅ |
 | J3 | Multi-client + historique conversation + admin | ✅ |
 | J4 | App deployee + multi-format + audit + design pro | ✅ |
-| J5 | Offre commerciale prete + premiers messages envoyes | ⬜ |
+| J5 | Pivot BTP + audit complet + corrections Top 5 | ✅ (technique) |
 
 ---
 
@@ -138,4 +147,4 @@ Question utilisateur
 
 ---
 
-*Derniere mise a jour : 03/03/2026*
+*Derniere mise a jour : 03/03/2026 (audit + corrections Top 5)*
