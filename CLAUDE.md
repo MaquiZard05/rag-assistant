@@ -88,6 +88,12 @@ rag-assistant/
 - Utilise des analogies simples. Relie les concepts à ce qu'il connaît déjà (Migration Predictor, embeddings, XGBoost).
 - Sinon, reste concis et orienté action.
 
+### Après chaque grande action (OBLIGATOIRE)
+Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
+1. **Commit + push** automatiquement (sans attendre que Marin le demande)
+2. **Mettre à jour CLAUDE.md** (roadmap, structure si changée)
+3. **Mettre à jour le README** si le comportement utilisateur change
+
 ### Anti-patterns (NE PAS FAIRE)
 - ❌ Ne pas ajouter de features hors de la roadmap du jour en cours.
 - ❌ Ne pas sur-ingénierer (pas de microservices, pas de Docker pour l'instant, pas de CI/CD).
@@ -119,8 +125,16 @@ rag-assistant/
   - Reranking cross-encoder (ms-marco-MiniLM-L-6-v2) post-retrieval
   - Contextual Chunk Headers (source + page injectes dans le chunk avant embedding)
   - Gestion erreurs : timeout Groq, validation PDF, messages clairs
-- **Jour 4** : Déploiement Streamlit Cloud + démo Loom ⬅️ EN COURS
-- **Jour 5** : Packaging commercial + outreach
+- **Jour 4** : Déploiement + multi-format + demo + audit ✅ TERMINÉ
+  - Déploiement Streamlit Cloud (st.secrets, auto-ingest, config.toml)
+  - Ingestion multi-format : PDF, TXT, DOCX, HTML (loaders LangChain)
+  - Interface chat style ChatGPT : sidebar visible, navigation, sélecteur client
+  - Cache embeddings (singleton) + accès ChromaDB direct pour stats (navigation instantanée)
+  - Pool hybride search x4 pour meilleur reranking
+  - 2 clients demo : Duval BTP (5 docs, 62 chunks) + Pulse Digital (5 docs, 533 chunks)
+  - Audit complet J+4 : scorecard C+, 4 correctifs immédiats appliqués
+  - Fix sécurité : XSS (html.escape), exceptions loguées, page fallback non-PDF
+- **Jour 5** : Packaging commercial + outreach ⬅️ PROCHAIN
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 

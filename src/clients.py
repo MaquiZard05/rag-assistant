@@ -86,8 +86,8 @@ def delete_client(client_id: str) -> bool:
     try:
         chroma_client = _get_chroma_client()
         chroma_client.delete_collection(client_id)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[ERREUR] {type(e).__name__}: {e}")
 
     del clients[client_id]
     _save_clients(clients)
@@ -115,7 +115,8 @@ def get_collection_stats(client_id: str) -> dict:
             "num_docs": len(files),
             "files": sorted(files),
         }
-    except Exception:
+    except Exception as e:
+        print(f"[ERREUR] {type(e).__name__}: {e}")
         return {"num_chunks": 0, "num_docs": 0, "files": []}
 
 
@@ -139,5 +140,6 @@ def delete_document(client_id: str, filename: str) -> int:
             collection.delete(ids=ids_to_delete)
 
         return len(ids_to_delete)
-    except Exception:
+    except Exception as e:
+        print(f"[ERREUR] {type(e).__name__}: {e}")
         return 0

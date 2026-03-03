@@ -2,6 +2,7 @@
 
 import sys
 import tempfile
+from html import escape
 from pathlib import Path
 
 import streamlit as st
@@ -37,8 +38,8 @@ load_css("styles/main.css")
 def render_header(title, subtitle=None):
     html = f'''
     <div class="app-header">
-        <h1>{title}</h1>
-        {"<p>" + subtitle + "</p>" if subtitle else ""}
+        <h1>{escape(str(title))}</h1>
+        {"<p>" + escape(str(subtitle)) + "</p>" if subtitle else ""}
     </div>
     '''
     st.markdown(html, unsafe_allow_html=True)

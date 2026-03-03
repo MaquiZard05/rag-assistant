@@ -11,7 +11,7 @@ from langchain_core.documents import Document
 from sentence_transformers import CrossEncoder
 
 from config import (
-    GROQ_API_KEY, EMBEDDING_MODEL, LLM_MODEL, RERANK_MODEL,
+    GROQ_API_KEY, LLM_MODEL, RERANK_MODEL,
     CHROMA_DIR, TOP_K, DEFAULT_COLLECTION, DEFAULT_SYSTEM_PROMPT,
 )
 
@@ -136,8 +136,11 @@ def build_context(chunks: list) -> str:
     parts = []
     for i, (doc, _score) in enumerate(chunks, 1):
         source = Path(doc.metadata.get("source", "inconnu")).name
-        page = doc.metadata.get("page", 0) + 1
-        parts.append(f"[Source {i}: {source}, page {page}]\n{doc.page_content}")
+        page = doc.metadata.get("page")
+        if page is not None:
+            parts.append(f"[Source {i}: {source}, page {page + 1}]\n{doc.page_content}")
+        else:
+            parts.append(f"[Source {i}: {source}]\n{doc.page_content}")
     return "\n\n---\n\n".join(parts)
 
 
@@ -182,7 +185,8 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
         try:
             llm = ChatGroq(model=LLM_MODEL, api_key=GROQ_API_KEY, temperature=0)
             search_question = contextualize_query(question, history, llm)
-        except Exception:
+        except Exception as e:
+            print(f"[ERREUR] {type(e).__name__}: {e}")
             search_question = question  # Fallback sur la question brute
 
     vectorstore = load_vectorstore(collection_name)
@@ -204,11 +208,12 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
     seen = set()
     for doc, score in chunks:
         source = Path(doc.metadata.get("source", "inconnu")).name
-        page = doc.metadata.get("page", 0) + 1
-        key = (source, page)
+        page = doc.metadata.get("page")
+        page_display = page + 1 if page is not None else None
+        key = (source, page_display)
         if key not in seen:
             seen.add(key)
-            sources.append({"file": source, "page": page, "score": score})
+            sources.append({"file": source, "page": page_display, "score": score})
 
     return {"answer": answer, "sources": sources, "num_sources": len(sources)}
 
@@ -219,11 +224,15 @@ def display_sources(chunks: list):
     seen = set()
     for doc, score in chunks:
         source = Path(doc.metadata.get("source", "inconnu")).name
-        page = doc.metadata.get("page", 0) + 1
-        key = (source, page)
+        page = doc.metadata.get("page")
+        page_display = page + 1 if page is not None else None
+        key = (source, page_display)
         if key not in seen:
             seen.add(key)
-            print(f"  - {source}, page {page} (score: {score:.3f})")
+            if page_display is not None:
+                print(f"  - {source}, page {page_display} (score: {score:.3f})")
+            else:
+                print(f"  - {source} (score: {score:.3f})")
 
 
 def main():

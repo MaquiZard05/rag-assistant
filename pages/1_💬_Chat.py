@@ -1,6 +1,7 @@
 """Page Chat — Interface RAG style ChatGPT. Sidebar toujours visible."""
 
 import sys
+from html import escape
 from pathlib import Path
 
 import streamlit as st
@@ -55,9 +56,10 @@ def render_sources(sources):
         with st.expander("Voir les sources"):
             for src in sources:
                 score_pct = min(100, max(0, src["score"] * 10))
+                page_info = f", page {src['page']}" if src.get("page") is not None else ""
                 st.markdown(
-                    f'<div class="source-box"><strong>{src["file"]}</strong>, '
-                    f'page {src["page"]} '
+                    f'<div class="source-box"><strong>{escape(src["file"])}</strong>'
+                    f'{page_info} '
                     f'<em>(pertinence : {score_pct:.0f}%)</em></div>',
                     unsafe_allow_html=True,
                 )
@@ -123,7 +125,7 @@ if not st.session_state.messages:
     <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
         <h2 style="color: #1a1a2e; font-weight: 600;">Bonjour 👋</h2>
         <p style="font-size: 1.05rem; max-width: 500px; margin: 0.5rem auto;">
-            Posez une question sur les documents de <strong>{active_client['name']}</strong>
+            Posez une question sur les documents de <strong>{escape(active_client['name'])}</strong>
         </p>
     </div>
     """, unsafe_allow_html=True)
