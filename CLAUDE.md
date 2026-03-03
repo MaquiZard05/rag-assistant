@@ -5,9 +5,10 @@ Tu travailles avec Marin sur un projet RAG (Retrieval-Augmented Generation) vend
 Marin est un non-développeur qui apprend par la pratique (vibe coding). Il a de l'expérience avec Python via son projet Migration Predictor (XGBoost, embeddings, MLP) mais c'est son premier projet web/IA orienté client.
 
 ## Objectif du Projet
-Construire un système RAG clé en main pour PME/TPE, agences et cabinets.
-Pitch : "Un assistant IA qui répond aux questions de vos équipes en s'appuyant sur vos propres documents."
-Le produit doit être FONCTIONNEL et MONTRABLE en 5 jours. Pas parfait — vendable.
+Construire un **Assistant conformite chantier BTP** verticalisé, vendable en freelance.
+Pitch : "Vos equipes terrain posent une question → reponse sourcee en 3 secondes avec le DTU, la page, et le score de fiabilite."
+Cible : PME BTP, conducteurs de travaux, chefs de chantier, dirigeants.
+Le produit doit être FONCTIONNEL et MONTRABLE. Pas parfait — vendable.
 
 ## Stack Technique (NE PAS CHANGER SANS DEMANDER)
 - **Langage** : Python 3.11+
@@ -39,17 +40,14 @@ rag-assistant/
 │   ├── 1_Chat.py           # Interface RAG (chat + upload + historique)
 │   └── 2_Admin.py          # Panneau admin (clients, docs, prompts)
 ├── styles/
-│   └── main.css           # CSS pro externe
+│   └── main.css           # Design system BTP (dark theme, orange chantier)
 ├── data/
-│   ├── clients.json       # Config clients multi-tenant
-│   ├── raw/               # Documents originaux uploadés
+│   ├── clients.json       # Config clients (Thermex BTP + Pulse Digital)
 │   └── chroma_db/         # Base vectorielle ChromaDB (persistante)
 ├── tests/
-│   └── test_pipeline.py   # Tests basiques du pipeline
-├── demos/
-│   └── sample_docs/       # Documents de démo pour les prospects
+│   └── compare_chunks.py  # Script de test chunking
 └── docs/
-    └── *.pdf              # PDFs de démo (5 docs Duval & Associés)
+    └── *.pdf              # PDFs demo BTP (5 docs Thermex)
 ```
 
 ## Conventions de Code
@@ -135,7 +133,15 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - Audit complet J+4 : scorecard C+, 4 correctifs immédiats appliqués
   - Fix sécurité : XSS (html.escape), exceptions loguées, page fallback non-PDF
   - 8 corrections design : renommage pages sans emojis, DM Sans, masquage nav Streamlit, curseur pointer, sidebar-doc-name
-- **Jour 5** : Packaging commercial + outreach ⬅️ PROCHAIN
+  - Emojis UI remplaces par icones Material/SVG
+- **Jour 5** : Pivot BTP + packaging commercial ⬅️ EN COURS
+  - Verticalisation "Assistant conformite chantier BTP"
+  - Dark theme industrie : #1A1B1E, accent orange #E8A23A, Source Sans 3 + JetBrains Mono
+  - Sidebar BTP : logo, categories chantier (Normes, CCTP, QSE, Fiches tech, DOE, Admin)
+  - 6 questions suggerees BTP sur ecran d'accueil
+  - Sources en bloc monospace avec scores colores (vert/jaune/rouge)
+  - Client demo : Thermex BTP (5 docs, 62 chunks)
+  - System prompt specialise BTP
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 
@@ -165,7 +171,7 @@ pip install -r requirements.txt
 
 ## Contexte Business
 - **Budget projet : 0€.** Tout doit être gratuit (API, hébergement, outils). Ce projet est un POC / proof of work pour décrocher des missions payantes.
-- Cible : PME/TPE françaises, agences, cabinets (conseil, juridique, comptable).
+- Cible : PME BTP françaises (conducteurs de travaux, chefs de chantier, dirigeants).
 - Le produit doit être compréhensible par un non-tech en 30 secondes.
 - Les démos doivent montrer : upload de doc → question → réponse sourcée.
 - Prix visé pour les futures missions clients : 500-1500€ la mise en place + 200-300€/mois de maintenance.
