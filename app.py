@@ -62,8 +62,8 @@ if not CHROMA_DIR.exists() or not any(CHROMA_DIR.iterdir()):
 with st.sidebar:
     st.markdown("### 📄 Assistant IA")
     st.markdown("---")
-    st.page_link("pages/1_Chat.py", label="💬 Chat", icon="💬")
-    st.page_link("pages/2_Admin.py", label="⚙️ Administration", icon="⚙️")
+    st.page_link("pages/1_Chat.py", label="Chat", icon="💬")
+    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️")
 
 st.markdown("""
 <div class="app-header">
@@ -75,6 +75,6 @@ st.markdown("""
 st.markdown("")
 col1, col2 = st.columns(2)
 with col1:
-    st.page_link("pages/1_Chat.py", label="💬 Ouvrir le Chat", icon="💬", use_container_width=True)
+    st.page_link("pages/1_Chat.py", label="Ouvrir le Chat", icon="💬", use_container_width=True)
 with col2:
-    st.page_link("pages/2_Admin.py", label="⚙️ Administration", icon="⚙️", use_container_width=True)
+    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️", use_container_width=True)

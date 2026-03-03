@@ -111,8 +111,8 @@ with st.sidebar:
             st.markdown(f'<div class="sidebar-doc-name">📄 {escape(f)}</div>', unsafe_allow_html=True)
 
     st.markdown("---")
-    st.page_link("pages/2_Admin.py", label="⚙️ Administration", icon="⚙️")
-    st.page_link("app.py", label="🏠 Accueil", icon="🏠")
+    st.page_link("pages/2_Admin.py", label="Administration", icon="⚙️")
+    st.page_link("app.py", label="Accueil", icon="🏠")
 
 
 # --- Zone de chat principale ---
