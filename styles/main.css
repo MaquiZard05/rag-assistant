@@ -47,10 +47,13 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 [data-testid="stSidebarNav"] {display: none !important;}
 
-/* === APP GLOBAL === */
+/* === APP GLOBAL — aucun fond blanc nulle part === */
 .stApp,
-[data-testid="stAppViewContainer"] {
-    background-color: var(--bg-primary);
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+.main .block-container,
+[data-testid="stBottomBlockContainer"] {
+    background-color: var(--bg-primary) !important;
     font-family: var(--font-body);
     color: var(--text-secondary);
 }
@@ -97,11 +100,11 @@ h1, h2, h3 {
     letter-spacing: 0.06em;
 }
 
-/* Boutons sidebar */
+/* Boutons sidebar — categories */
 [data-testid="stSidebar"] .stButton > button {
-    background-color: var(--bg-card) !important;
-    color: var(--text-secondary) !important;
-    border: 1px solid var(--border-default) !important;
+    background-color: transparent !important;
+    color: #C8C2B6 !important;
+    border: 1px solid var(--border-active) !important;
     border-radius: 8px !important;
     box-shadow: none !important;
     font-weight: 500 !important;
@@ -110,8 +113,16 @@ h1, h2, h3 {
 }
 
 [data-testid="stSidebar"] .stButton > button:hover {
-    background-color: var(--bg-card-hover) !important;
+    background-color: transparent !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:active,
+[data-testid="stSidebar"] .stButton > button:focus {
+    background-color: var(--bg-accent) !important;
     border-color: var(--border-active) !important;
+    color: var(--accent) !important;
 }
 
 /* Liens page sidebar */
@@ -297,8 +308,19 @@ h1, h2, h3 {
     font-family: var(--font-body) !important;
 }
 
-/* Chat input */
+/* Chat input — conteneur parent : fond sombre, pas blanc */
+[data-testid="stChatInput"],
+[data-testid="stChatInputContainer"],
+.stChatInputContainer,
+[data-testid="stBottom"],
+[data-testid="stBottomBlockContainer"] {
+    background-color: var(--bg-primary) !important;
+    border-color: var(--border-default) !important;
+}
+
+/* Chat input — textarea */
 [data-testid="stChatInput"] textarea,
+[data-testid="stChatInput"] input,
 .stChatInputContainer textarea {
     background-color: var(--bg-card) !important;
     border: 1px solid var(--border-default) !important;
@@ -308,10 +330,31 @@ h1, h2, h3 {
     font-size: 0.95rem !important;
 }
 
+[data-testid="stChatInput"] textarea::placeholder,
+.stChatInputContainer textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
 [data-testid="stChatInput"] textarea:focus,
+[data-testid="stChatInput"] input:focus,
 .stChatInputContainer textarea:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 1px var(--accent) !important;
+    border-color: var(--border-active) !important;
+    box-shadow: none !important;
+}
+
+/* Bouton d'envoi chat */
+[data-testid="stChatInput"] button,
+.stChatInputContainer button {
+    background-color: var(--accent) !important;
+    color: var(--bg-primary) !important;
+    border-radius: 10px !important;
+    border: none !important;
+}
+
+[data-testid="stChatInput"] button:disabled,
+.stChatInputContainer button:disabled {
+    background-color: var(--border-default) !important;
+    color: var(--text-muted) !important;
 }
 
 /* Disclaimer */
@@ -493,21 +536,41 @@ h1, h2, h3 {
     font-size: 0.8rem;
 }
 
-/* === BUTTONS (main area) === */
+/* === BUTTONS (main area — suggestions + actions) === */
 .stButton > button {
-    background: var(--accent-gradient);
-    color: var(--bg-primary);
-    border: none;
+    background: var(--bg-card) !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-default) !important;
     border-radius: 10px;
     padding: 0.5rem 1.2rem;
-    font-weight: 600;
-    font-size: 0.875rem;
+    font-weight: 500;
+    font-size: 0.85rem;
     font-family: var(--font-body);
     cursor: pointer;
     transition: all 0.15s ease;
+    text-align: left !important;
+    white-space: normal !important;
+    height: auto !important;
+    min-height: 2.5rem;
 }
 
 .stButton > button:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--border-active) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Boutons d'action (admin: sauvegarder, supprimer, creer) */
+[data-testid="stForm"] .stButton > button,
+.stFormSubmitButton > button {
+    background: var(--accent-gradient) !important;
+    color: var(--bg-primary) !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+[data-testid="stForm"] .stButton > button:hover,
+.stFormSubmitButton > button:hover {
     filter: brightness(1.1);
     box-shadow: 0 2px 8px rgba(232, 162, 58, 0.2);
 }
