@@ -6,15 +6,16 @@
 /* === RESET STREAMLIT DEFAULTS === */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-/* On garde le header visible pour la navigation */
+/* Masquer la navigation par defaut de Streamlit */
+[data-testid="stSidebarNav"] {display: none !important;}
 
 /* === TYPOGRAPHIE === */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 /* === APP GLOBAL === */
 .stApp {
     background-color: #f7f7f8;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     color: #1a1a2e;
 }
 
@@ -81,9 +82,19 @@ footer {visibility: hidden;}
     margin: 0.8rem 0 !important;
 }
 
-/* Sidebar nav (pages Streamlit) */
-[data-testid="stSidebarNav"] {
-    padding-top: 0.5rem;
+/* Curseur pointer sur les selectbox */
+[data-testid="stSelectbox"] > div > div {
+    cursor: pointer !important;
+}
+
+/* Noms de documents dans la sidebar */
+.sidebar-doc-name {
+    font-size: 0.82rem;
+    color: #8b949e;
+    padding: 0.15rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* === CUSTOM HEADER (pages non-chat) === */

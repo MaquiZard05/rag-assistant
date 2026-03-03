@@ -59,11 +59,11 @@ with st.sidebar:
     st.markdown("### ⚙️ Administration")
     st.caption("Gestion clients, documents, parametres")
     st.markdown("---")
-    st.page_link("pages/1_💬_Chat.py", label="💬 Retour au Chat", icon="💬")
+    st.page_link("pages/1_Chat.py", label="💬 Retour au Chat", icon="💬")
     st.page_link("app.py", label="🏠 Accueil", icon="🏠")
 
 # --- Header ---
-render_header("⚙️ Administration", "Gerez vos clients, documents et parametres")
+render_header("Administration", "Gerez vos clients, documents et parametres")
 
 # --- Dashboard ---
 clients = list_clients()

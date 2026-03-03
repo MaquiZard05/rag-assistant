@@ -81,12 +81,10 @@ with st.sidebar:
     client_ids = list(clients.keys())
     client_names = [clients[cid]["name"] for cid in client_ids]
 
-    st.markdown("**Espace client**")
     selected_idx = st.selectbox(
-        "Client",
+        "Espace client",
         range(len(client_ids)),
         format_func=lambda i: client_names[i],
-        label_visibility="collapsed",
     )
     active_client_id = client_ids[selected_idx]
     active_client = clients[active_client_id]
@@ -110,10 +108,10 @@ with st.sidebar:
     st.markdown(f"**{len(indexed_files)} document(s)** indexes")
     if indexed_files:
         for f in indexed_files:
-            st.caption(f"📄 {f}")
+            st.markdown(f'<div class="sidebar-doc-name">📄 {escape(f)}</div>', unsafe_allow_html=True)
 
     st.markdown("---")
-    st.page_link("pages/2_⚙️_Admin.py", label="⚙️ Administration", icon="⚙️")
+    st.page_link("pages/2_Admin.py", label="⚙️ Administration", icon="⚙️")
     st.page_link("app.py", label="🏠 Accueil", icon="🏠")
 
 
