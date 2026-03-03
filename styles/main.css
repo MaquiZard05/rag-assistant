@@ -308,53 +308,80 @@ h1, h2, h3 {
     font-family: var(--font-body) !important;
 }
 
-/* Chat input — conteneur parent : fond sombre, pas blanc */
+/* Chat input — TUER TOUT LE BLANC des conteneurs */
+[data-testid="stBottom"],
+[data-testid="stBottomBlockContainer"],
 [data-testid="stChatInput"],
 [data-testid="stChatInputContainer"],
 .stChatInputContainer,
-[data-testid="stBottom"],
-[data-testid="stBottomBlockContainer"] {
-    background-color: var(--bg-primary) !important;
-    border-color: var(--border-default) !important;
+.stBottom,
+[data-testid="stBottom"] > div,
+[data-testid="stBottomBlockContainer"] > div,
+[data-testid="stBottom"] > div > div {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
+    border-color: #2A2B2E !important;
+    box-shadow: none !important;
 }
 
-/* Chat input — textarea */
+/* Chat input — textarea et input */
 [data-testid="stChatInput"] textarea,
 [data-testid="stChatInput"] input,
-.stChatInputContainer textarea {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-default) !important;
+[data-testid="stChatMessageInput"] textarea,
+[data-testid="stChatMessageInput"] input,
+.stChatInput textarea,
+.stChatInput input,
+[data-testid="stChatInput"] > div,
+[data-testid="stChatInput"] > div > div {
+    background-color: #1E1F22 !important;
+    background: #1E1F22 !important;
+    color: #F5F0E8 !important;
+    border: 1px solid #2A2B2E !important;
     border-radius: 12px !important;
-    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    outline: none !important;
+    caret-color: #E8A23A !important;
     font-family: var(--font-body) !important;
     font-size: 0.95rem !important;
 }
 
 [data-testid="stChatInput"] textarea::placeholder,
 .stChatInputContainer textarea::placeholder {
-    color: var(--text-muted) !important;
+    color: #4A4740 !important;
 }
 
+/* Chat input focus */
 [data-testid="stChatInput"] textarea:focus,
 [data-testid="stChatInput"] input:focus,
-.stChatInputContainer textarea:focus {
-    border-color: var(--border-active) !important;
+[data-testid="stChatMessageInput"] textarea:focus {
+    border: 1px solid #3D3529 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: #1E1F22 !important;
+}
+
+/* Wrapper direct de l'input */
+[data-testid="stChatInput"] > div:first-child,
+.stChatInputContainer > div {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
+    border: none !important;
     box-shadow: none !important;
 }
 
 /* Bouton d'envoi chat */
 [data-testid="stChatInput"] button,
 .stChatInputContainer button {
-    background-color: var(--accent) !important;
-    color: var(--bg-primary) !important;
+    background-color: #E8A23A !important;
+    color: #1A1B1E !important;
     border-radius: 10px !important;
     border: none !important;
 }
 
 [data-testid="stChatInput"] button:disabled,
 .stChatInputContainer button:disabled {
-    background-color: var(--border-default) !important;
-    color: var(--text-muted) !important;
+    background-color: #2A2B2E !important;
+    color: #4A4740 !important;
 }
 
 /* Disclaimer */
@@ -536,28 +563,54 @@ h1, h2, h3 {
     font-size: 0.8rem;
 }
 
-/* === BUTTONS (main area — suggestions + actions) === */
-.stButton > button {
-    background: var(--bg-card) !important;
-    color: var(--text-secondary) !important;
-    border: 1px solid var(--border-default) !important;
-    border-radius: 10px;
+/* === BUTTONS (main area — suggestions) === */
+.stButton > button,
+[data-testid="baseButton-secondary"],
+[data-testid="stBaseButton-secondary"],
+button[kind="secondary"],
+.main .stButton > button {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
+    color: #A09A8E !important;
+    border: 1px solid #2A2B2E !important;
+    border-radius: 10px !important;
     padding: 0.5rem 1.2rem;
     font-weight: 500;
     font-size: 0.85rem;
     font-family: var(--font-body);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease !important;
     text-align: left !important;
     white-space: normal !important;
     height: auto !important;
     min-height: 2.5rem;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
-.stButton > button:hover {
-    background: var(--bg-card-hover) !important;
-    border-color: var(--border-active) !important;
-    color: var(--text-primary) !important;
+.stButton > button:hover,
+[data-testid="baseButton-secondary"]:hover,
+[data-testid="stBaseButton-secondary"]:hover,
+button[kind="secondary"]:hover,
+.main .stButton > button:hover {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
+    border: 1px solid #E8A23A !important;
+    color: #E8A23A !important;
+    box-shadow: none !important;
+}
+
+.stButton > button:focus,
+.stButton > button:active,
+.stButton > button:focus:not(:active),
+[data-testid="baseButton-secondary"]:focus,
+[data-testid="baseButton-secondary"]:active {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
+    border: 1px solid #2A2B2E !important;
+    color: #A09A8E !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 /* Boutons d'action (admin: sauvegarder, supprimer, creer) */
@@ -729,4 +782,20 @@ h1, h2, h3 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
+}
+
+/* === TOOLTIPS === */
+[data-testid="stTooltipContent"],
+.stTooltipContent,
+div[role="tooltip"] {
+    background-color: #1E1F22 !important;
+    color: #A09A8E !important;
+    border: 1px solid #2A2B2E !important;
+}
+
+/* === NUCLEAR OPTION — tuer les derniers fonds blancs === */
+[data-testid="stBottom"],
+[data-testid="stBottom"] *:not(button):not(svg):not(path) {
+    background-color: #1A1B1E !important;
+    background: #1A1B1E !important;
 }
