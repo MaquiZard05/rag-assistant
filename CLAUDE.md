@@ -47,7 +47,7 @@ rag-assistant/
 ├── tests/
 │   └── compare_chunks.py  # Script de test chunking
 └── docs/
-    └── *.pdf              # PDFs demo BTP (5 docs Thermex)
+    └── *.pdf              # 6 PDFs demo BTP (DTU, CCTP, QSE, Fiches, DOE, Memo)
 ```
 
 ## Conventions de Code
@@ -139,9 +139,11 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - Dark theme industrie : #1A1B1E, accent orange #E8A23A, Source Sans 3 + JetBrains Mono
   - Sidebar BTP : logo, categories chantier (Normes, CCTP, QSE, Fiches tech, DOE, Admin)
   - 6 questions suggerees BTP sur ecran d'accueil
-  - Sources en bloc monospace avec scores colores (vert/jaune/rouge)
-  - Client demo : Thermex BTP (5 docs, 62 chunks)
-  - System prompt specialise BTP
+  - Sources en Markdown pur avec labels (Tres pertinent / Pertinent / Pertinence faible)
+  - 6 PDFs BTP demo : DTU, CCTP, QSE, Fiches tech, DOE, Memo (89 chunks)
+  - System prompt strict : UNIQUEMENT les documents, JAMAIS de generalites
+  - Seuil de pertinence MIN_RELEVANCE_SCORE=0.3 (pas de LLM si rien pertinent)
+  - 7/7 tests valides (6 questions BTP + hors-sujet filtre)
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 
