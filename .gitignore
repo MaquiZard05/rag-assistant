@@ -23,6 +23,9 @@ build/
 .vscode/
 .idea/
 
+# Notes internes / audits (ne pas exposer publiquement)
+notes/
+
 # OS
 .DS_Store
 Thumbs.db

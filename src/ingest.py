@@ -1,9 +1,14 @@
-"""Script d'ingestion : charge les PDFs, découpe en chunks, stocke dans ChromaDB."""
+"""Script d'ingestion : charge les documents (PDF, TXT, DOCX, HTML), decoupe en chunks, stocke dans ChromaDB."""
 
 import sys
 from pathlib import Path
 
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    TextLoader,
+    Docx2txtLoader,
+    BSHTMLLoader,
+)
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -13,24 +18,56 @@ from config import (
     DEFAULT_COLLECTION,
 )
 
+# Formats supportes : extension -> loader class
+SUPPORTED_FORMATS = {
+    ".pdf": PyPDFLoader,
+    ".txt": TextLoader,
+    ".docx": Docx2txtLoader,
+    ".html": BSHTMLLoader,
+    ".htm": BSHTMLLoader,
+}
+
+
+_embeddings_cache = None
+
 
 def get_embeddings():
-    """Retourne le modele d'embeddings."""
-    return HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    """Retourne le modele d'embeddings (charge une seule fois, garde en memoire)."""
+    global _embeddings_cache
+    if _embeddings_cache is None:
+        _embeddings_cache = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    return _embeddings_cache
 
 
-def load_pdfs(docs_dir: Path) -> list:
-    """Charge tous les PDFs du dossier."""
+def _get_loader(file_path: Path):
+    """Retourne le loader adapte au format du fichier."""
+    ext = file_path.suffix.lower()
+    loader_class = SUPPORTED_FORMATS.get(ext)
+    if not loader_class:
+        raise ValueError(
+            f"Format non supporte : {ext}. "
+            f"Formats acceptes : {', '.join(SUPPORTED_FORMATS.keys())}"
+        )
+    if ext == ".txt":
+        return loader_class(str(file_path), encoding="utf-8")
+    return loader_class(str(file_path))
+
+
+def load_documents(docs_dir: Path) -> list:
+    """Charge tous les documents supportes du dossier (PDF, TXT, DOCX, HTML)."""
     documents = []
-    pdf_files = sorted(docs_dir.glob("*.pdf"))
+    all_files = sorted(
+        f for f in docs_dir.iterdir()
+        if f.suffix.lower() in SUPPORTED_FORMATS
+    )
 
-    if not pdf_files:
-        print(f"Aucun PDF trouve dans {docs_dir}")
+    if not all_files:
+        print(f"Aucun document trouve dans {docs_dir}")
         sys.exit(1)
 
-    for pdf_path in pdf_files:
-        print(f"  - {pdf_path.name}")
-        loader = PyPDFLoader(str(pdf_path))
+    for file_path in all_files:
+        print(f"  - {file_path.name}")
+        loader = _get_loader(file_path)
         docs = loader.load()
         documents.extend(docs)
 
@@ -48,38 +85,46 @@ def split_documents(documents: list) -> list:
 
 
 def add_contextual_headers(chunks: list) -> list:
-    """Ajoute un header contextuel a chaque chunk (source + page).
+    """Ajoute un header contextuel a chaque chunk (source + page si dispo).
 
     Le header est encode dans le vecteur, ce qui ameliore la pertinence
     de la recherche semantique.
     """
     for chunk in chunks:
         source = Path(chunk.metadata.get("source", "inconnu")).name
-        page = chunk.metadata.get("page", 0) + 1
-        header = f"[Source: {source} | Page {page}]\n\n"
+        page = chunk.metadata.get("page")
+        if page is not None:
+            header = f"[Source: {source} | Page {page + 1}]\n\n"
+        else:
+            header = f"[Source: {source}]\n\n"
         chunk.page_content = header + chunk.page_content
     return chunks
 
 
-def ingest_single_pdf(pdf_path: Path, collection_name: str = DEFAULT_COLLECTION,
-                      original_name: str = None) -> int:
-    """Ingere un seul PDF dans ChromaDB. Retourne le nombre de chunks ajoutes.
+def ingest_single_file(file_path: Path, collection_name: str = DEFAULT_COLLECTION,
+                       original_name: str = None) -> int:
+    """Ingere un document (PDF, TXT, DOCX, HTML) dans ChromaDB.
 
+    Retourne le nombre de chunks ajoutes.
     collection_name : collection ChromaDB (= client)
     original_name : nom original du fichier (pour les uploads Streamlit)
     """
-    # Verifier que le fichier existe et est un PDF
-    if not pdf_path.exists():
-        raise FileNotFoundError(f"Fichier introuvable : {pdf_path}")
-    if pdf_path.suffix.lower() != ".pdf":
-        raise ValueError(f"Le fichier n'est pas un PDF : {pdf_path.name}")
+    if not file_path.exists():
+        raise FileNotFoundError(f"Fichier introuvable : {file_path}")
 
-    # Charger le PDF
+    ext = file_path.suffix.lower()
+    if ext not in SUPPORTED_FORMATS:
+        raise ValueError(
+            f"Format non supporte : {ext}. "
+            f"Formats acceptes : {', '.join(SUPPORTED_FORMATS.keys())}"
+        )
+
+    # Charger le document avec le bon loader
     try:
-        loader = PyPDFLoader(str(pdf_path))
+        loader = _get_loader(file_path)
         documents = loader.load()
     except Exception as e:
-        raise ValueError(f"Impossible de lire le PDF '{pdf_path.name}' : {e}")
+        raise ValueError(f"Impossible de lire '{file_path.name}' : {e}")
 
     # Remplacer le chemin temporaire par le vrai nom de fichier
     if original_name:
@@ -108,37 +153,43 @@ def ingest_single_pdf(pdf_path: Path, collection_name: str = DEFAULT_COLLECTION,
 
 
 def get_indexed_files(collection_name: str = DEFAULT_COLLECTION) -> list[str]:
-    """Retourne la liste des fichiers indexes dans une collection."""
+    """Retourne la liste des fichiers indexes (acces direct ChromaDB, sans embeddings)."""
     if not CHROMA_DIR.exists():
         return []
 
-    embeddings = get_embeddings()
-    vectorstore = Chroma(
-        persist_directory=str(CHROMA_DIR),
-        embedding_function=embeddings,
-        collection_name=collection_name,
-    )
+    try:
+        import chromadb
+        client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+        collection = client.get_or_create_collection(collection_name)
+        results = collection.get(include=["metadatas"])
 
-    collection = vectorstore.get()
-    if not collection or not collection.get("metadatas"):
+        if not results or not results.get("metadatas"):
+            return []
+
+        files = set()
+        for meta in results["metadatas"]:
+            source = meta.get("source", "")
+            if source:
+                files.add(Path(source).name)
+
+        return sorted(files)
+    except Exception:
         return []
 
-    files = set()
-    for meta in collection["metadatas"]:
-        source = meta.get("source", "")
-        if source:
-            files.add(Path(source).name)
 
-    return sorted(files)
+def ingest_single_pdf(pdf_path: Path, collection_name: str = DEFAULT_COLLECTION,
+                      original_name: str = None) -> int:
+    """Alias de compatibilite — redirige vers ingest_single_file."""
+    return ingest_single_file(pdf_path, collection_name, original_name)
 
 
 def main():
-    """Ingestion CLI des PDFs du dossier docs/ dans la collection par defaut."""
+    """Ingestion CLI des documents du dossier docs/ dans la collection par defaut."""
     print("=== Ingestion des documents ===\n")
 
-    print(f"1. Chargement des PDFs depuis {DOCS_DIR}/")
-    documents = load_pdfs(DOCS_DIR)
-    print(f"   -> {len(documents)} pages chargees\n")
+    print(f"1. Chargement des documents depuis {DOCS_DIR}/")
+    documents = load_documents(DOCS_DIR)
+    print(f"   -> {len(documents)} pages/sections chargees\n")
 
     print("2. Decoupage en chunks")
     chunks = split_documents(documents)

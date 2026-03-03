@@ -13,13 +13,13 @@ from clients import (
     list_clients, create_client, update_client_prompt,
     delete_client, get_collection_stats, delete_document,
 )
-from ingest import ingest_single_pdf
+from ingest import ingest_single_file
 
 # --- Configuration ---
 st.set_page_config(
     page_title="Admin — Assistant Documentaire IA",
     page_icon="⚙️",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded",
 )
 
@@ -52,6 +52,14 @@ def render_metric(value, label):
     </div>
     ''', unsafe_allow_html=True)
 
+
+# --- Sidebar navigation ---
+with st.sidebar:
+    st.markdown("### ⚙️ Administration")
+    st.caption("Gestion clients, documents, parametres")
+    st.markdown("---")
+    st.page_link("pages/1_💬_Chat.py", label="💬 Retour au Chat", icon="💬")
+    st.page_link("app.py", label="🏠 Accueil", icon="🏠")
 
 # --- Header ---
 render_header("⚙️ Administration", "Gerez vos clients, documents et parametres")
@@ -112,8 +120,8 @@ for cid, client in clients.items():
         # Upload de documents pour ce client
         st.markdown("**Ajouter des documents**")
         uploaded_files = st.file_uploader(
-            f"Deposez des PDFs pour {client['name']}",
-            type=["pdf"],
+            f"Deposez des documents pour {client['name']}",
+            type=["pdf", "txt", "docx", "html", "htm"],
             accept_multiple_files=True,
             key=f"upload_{cid}",
             label_visibility="collapsed",
@@ -124,12 +132,13 @@ for cid, client in clients.items():
                 processed_key = f"processed_{cid}_{uploaded_file.name}"
                 if processed_key not in st.session_state:
                     with st.spinner(f"Indexation de {uploaded_file.name}..."):
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                        suffix = Path(uploaded_file.name).suffix
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
                             tmp.write(uploaded_file.read())
                             tmp_path = Path(tmp.name)
 
                         try:
-                            num_chunks = ingest_single_pdf(
+                            num_chunks = ingest_single_file(
                                 tmp_path,
                                 collection_name=cid,
                                 original_name=uploaded_file.name,

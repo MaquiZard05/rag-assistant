@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 from langchain_groq import ChatGroq
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.prompts import ChatPromptTemplate
@@ -30,8 +29,9 @@ def get_reranker():
 
 
 def load_vectorstore(collection_name: str = DEFAULT_COLLECTION):
-    """Charge la base vectorielle ChromaDB pour un client."""
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    """Charge la base vectorielle ChromaDB pour un client (embeddings caches)."""
+    from ingest import get_embeddings
+    embeddings = get_embeddings()
     return Chroma(
         persist_directory=str(CHROMA_DIR),
         embedding_function=embeddings,
@@ -74,9 +74,15 @@ def contextualize_query(question: str, history: list, llm) -> str:
 
 
 def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
-    """Recherche hybride : combine vectorielle (sens) + BM25 (mots-cles)."""
+    """Recherche hybride : combine vectorielle (sens) + BM25 (mots-cles).
+
+    Recupere un large pool de candidats (top_k * 4 par methode) pour
+    donner au reranker suffisamment de chunks pertinents a evaluer.
+    """
+    pool_size = top_k * 4  # 20 candidats par methode
+
     # 1. Recherche vectorielle
-    vector_results = vectorstore.similarity_search_with_score(question, k=top_k * 2)
+    vector_results = vectorstore.similarity_search_with_score(question, k=pool_size)
 
     # 2. Recherche BM25
     collection = vectorstore.get()
@@ -88,7 +94,7 @@ def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
         meta = collection["metadatas"][i] if collection.get("metadatas") else {}
         all_docs.append(Document(page_content=text, metadata=meta))
 
-    bm25_retriever = BM25Retriever.from_documents(all_docs, k=top_k * 2)
+    bm25_retriever = BM25Retriever.from_documents(all_docs, k=pool_size)
     bm25_results = bm25_retriever.invoke(question)
 
     # 3. Fusion RRF (Reciprocal Rank Fusion)
@@ -108,7 +114,7 @@ def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
             doc_scores[key] = {"doc": doc, "score": rrf_score, "original_score": 1.0}
 
     sorted_results = sorted(doc_scores.values(), key=lambda x: x["score"], reverse=True)
-    return [(r["doc"], r["original_score"]) for r in sorted_results[:top_k * 2]]
+    return [(r["doc"], r["original_score"]) for r in sorted_results[:pool_size]]
 
 
 def rerank(question: str, chunks: list, top_k: int = TOP_K) -> list:

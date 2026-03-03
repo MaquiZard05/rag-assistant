@@ -3,13 +3,18 @@
 import json
 from pathlib import Path
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+import chromadb
 
 from config import (
-    CLIENTS_FILE, CHROMA_DIR, EMBEDDING_MODEL,
+    CLIENTS_FILE, CHROMA_DIR,
     DEFAULT_COLLECTION, DEFAULT_SYSTEM_PROMPT,
 )
+
+
+def _get_chroma_client():
+    """Client ChromaDB natif — pas besoin d'embeddings pour les operations de lecture."""
+    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+    return chromadb.PersistentClient(path=str(CHROMA_DIR))
 
 
 def _load_clients() -> dict:
@@ -71,23 +76,18 @@ def update_client_prompt(client_id: str, system_prompt: str) -> bool:
 def delete_client(client_id: str) -> bool:
     """Supprime un client et sa collection ChromaDB."""
     if client_id == DEFAULT_COLLECTION:
-        return False  # On ne supprime pas le client par defaut
+        return False
 
     clients = _load_clients()
     if client_id not in clients:
         return False
 
-    # Supprimer la collection ChromaDB
+    # Supprimer la collection ChromaDB (acces direct, sans embeddings)
     try:
-        embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-        vectorstore = Chroma(
-            persist_directory=str(CHROMA_DIR),
-            embedding_function=embeddings,
-            collection_name=client_id,
-        )
-        vectorstore.delete_collection()
+        chroma_client = _get_chroma_client()
+        chroma_client.delete_collection(client_id)
     except Exception:
-        pass  # La collection n'existe peut-etre pas encore
+        pass
 
     del clients[client_id]
     _save_clients(clients)
@@ -95,27 +95,23 @@ def delete_client(client_id: str) -> bool:
 
 
 def get_collection_stats(client_id: str) -> dict:
-    """Retourne les stats d'une collection (nb docs, nb chunks, liste fichiers)."""
+    """Retourne les stats d'une collection (acces direct ChromaDB, sans embeddings)."""
     try:
-        embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-        vectorstore = Chroma(
-            persist_directory=str(CHROMA_DIR),
-            embedding_function=embeddings,
-            collection_name=client_id,
-        )
-        collection = vectorstore.get()
+        chroma_client = _get_chroma_client()
+        collection = chroma_client.get_or_create_collection(client_id)
+        results = collection.get(include=["metadatas"])
 
-        if not collection or not collection.get("metadatas"):
+        if not results or not results.get("metadatas"):
             return {"num_chunks": 0, "num_docs": 0, "files": []}
 
         files = set()
-        for meta in collection["metadatas"]:
+        for meta in results["metadatas"]:
             source = meta.get("source", "")
             if source:
                 files.add(Path(source).name)
 
         return {
-            "num_chunks": len(collection["documents"]),
+            "num_chunks": len(results["ids"]),
             "num_docs": len(files),
             "files": sorted(files),
         }
@@ -124,28 +120,23 @@ def get_collection_stats(client_id: str) -> dict:
 
 
 def delete_document(client_id: str, filename: str) -> int:
-    """Supprime tous les chunks d'un document dans une collection. Retourne le nb supprime."""
+    """Supprime tous les chunks d'un document (acces direct, sans embeddings)."""
     try:
-        embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-        vectorstore = Chroma(
-            persist_directory=str(CHROMA_DIR),
-            embedding_function=embeddings,
-            collection_name=client_id,
-        )
-        collection = vectorstore.get()
+        chroma_client = _get_chroma_client()
+        collection = chroma_client.get_or_create_collection(client_id)
+        results = collection.get(include=["metadatas"])
 
-        if not collection or not collection.get("metadatas"):
+        if not results or not results.get("metadatas"):
             return 0
 
-        # Trouver les IDs des chunks de ce fichier
         ids_to_delete = []
-        for i, meta in enumerate(collection["metadatas"]):
+        for i, meta in enumerate(results["metadatas"]):
             source = Path(meta.get("source", "")).name
             if source == filename:
-                ids_to_delete.append(collection["ids"][i])
+                ids_to_delete.append(results["ids"][i])
 
         if ids_to_delete:
-            vectorstore.delete(ids=ids_to_delete)
+            collection.delete(ids=ids_to_delete)
 
         return len(ids_to_delete)
     except Exception:

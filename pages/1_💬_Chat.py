@@ -1,4 +1,4 @@
-"""Page Chat — Interface RAG epuree. Uniquement header + conversation + input."""
+"""Page Chat — Interface RAG style ChatGPT. Sidebar toujours visible."""
 
 import sys
 from pathlib import Path
@@ -17,8 +17,8 @@ from clients import list_clients
 st.set_page_config(
     page_title="Chat — Assistant Documentaire IA",
     page_icon="💬",
-    layout="wide",
-    initial_sidebar_state="collapsed",
+    layout="centered",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -30,24 +30,6 @@ def load_css(css_file: str):
 
 
 load_css("styles/main.css")
-
-
-def render_header(title, subtitle=None):
-    html = f'''
-    <div class="app-header">
-        <h1>{title}</h1>
-        {"<p>" + subtitle + "</p>" if subtitle else ""}
-    </div>
-    '''
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def render_typing():
-    st.markdown('''
-    <div class="typing-indicator">
-        <span></span><span></span><span></span>
-    </div>
-    ''', unsafe_allow_html=True)
 
 
 def get_confidence(sources):
@@ -85,16 +67,24 @@ def render_sources(sources):
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- Sidebar minimaliste ---
+# --- Sidebar style ChatGPT ---
 with st.sidebar:
+    st.markdown("### 💬 Assistant IA")
+    st.caption("Posez vos questions sur vos documents")
+
+    st.markdown("---")
+
+    # Selecteur de client (= espace de travail)
     clients = list_clients()
     client_ids = list(clients.keys())
     client_names = [clients[cid]["name"] for cid in client_ids]
 
+    st.markdown("**Espace client**")
     selected_idx = st.selectbox(
         "Client",
         range(len(client_ids)),
         format_func=lambda i: client_names[i],
+        label_visibility="collapsed",
     )
     active_client_id = client_ids[selected_idx]
     active_client = clients[active_client_id]
@@ -106,14 +96,39 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.active_client = active_client_id
 
+    # Bouton nouvelle conversation
+    if st.button("🗑 Nouvelle conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
-# --- Header ---
-render_header(
-    f"📄 {active_client['name']}",
-    "Posez vos questions, obtenez des reponses sourcees depuis vos documents."
-)
+    st.markdown("---")
 
-# --- Historique ---
+    # Stats rapides
+    indexed_files = get_indexed_files(collection_name=active_client_id)
+    st.markdown(f"**{len(indexed_files)} document(s)** indexes")
+    if indexed_files:
+        for f in indexed_files:
+            st.caption(f"📄 {f}")
+
+    st.markdown("---")
+    st.page_link("pages/2_⚙️_Admin.py", label="⚙️ Administration", icon="⚙️")
+    st.page_link("app.py", label="🏠 Accueil", icon="🏠")
+
+
+# --- Zone de chat principale ---
+
+# Message d'accueil si conversation vide
+if not st.session_state.messages:
+    st.markdown(f"""
+    <div style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+        <h2 style="color: #1a1a2e; font-weight: 600;">Bonjour 👋</h2>
+        <p style="font-size: 1.05rem; max-width: 500px; margin: 0.5rem auto;">
+            Posez une question sur les documents de <strong>{active_client['name']}</strong>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Historique
 for message in st.session_state.messages:
     avatar = "👤" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):
@@ -128,10 +143,8 @@ if prompt := st.chat_input("Posez votre question..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🤖"):
-        indexed_files = get_indexed_files(collection_name=active_client_id)
-
         if not indexed_files:
-            msg = "Aucun document disponible. Rendez-vous sur la page Admin pour en ajouter."
+            msg = "Aucun document disponible. Rendez-vous sur la page **⚙️ Administration** pour en ajouter."
             st.markdown(msg)
             st.session_state.messages.append({"role": "assistant", "content": msg})
         else:
@@ -152,7 +165,6 @@ if prompt := st.chat_input("Posez votre question..."):
                     history=st.session_state.messages[:-1],
                 )
 
-                # Remplacer le typing par la reponse
                 typing_placeholder.empty()
 
                 st.markdown(result["answer"])

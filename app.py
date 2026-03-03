@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 st.set_page_config(
     page_title="Assistant Documentaire IA",
     page_icon="📄",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded",
 )
 
@@ -29,19 +29,17 @@ load_css("styles/main.css")
 from config import CHROMA_DIR, DOCS_DIR
 
 if not CHROMA_DIR.exists() or not any(CHROMA_DIR.iterdir()):
-    docs = list(DOCS_DIR.glob("*.pdf"))
+    from ingest import SUPPORTED_FORMATS, _get_loader, get_embeddings, add_contextual_headers
+    docs = [f for f in DOCS_DIR.iterdir() if f.suffix.lower() in SUPPORTED_FORMATS]
     if docs:
         with st.spinner("Premiere visite — indexation des documents de demo..."):
-            from ingest import ingest_single_pdf, get_embeddings
             from langchain_community.vectorstores import Chroma
-            from langchain_community.document_loaders import PyPDFLoader
             from langchain_text_splitters import RecursiveCharacterTextSplitter
-            from config import CHUNK_SIZE, CHUNK_OVERLAP, EMBEDDING_MODEL, DEFAULT_COLLECTION
+            from config import CHUNK_SIZE, CHUNK_OVERLAP, DEFAULT_COLLECTION
 
-            # Ingestion groupee (plus rapide que un par un)
             all_documents = []
-            for pdf_path in sorted(docs):
-                loader = PyPDFLoader(str(pdf_path))
+            for doc_path in sorted(docs):
+                loader = _get_loader(doc_path)
                 all_documents.extend(loader.load())
 
             splitter = RecursiveCharacterTextSplitter(
@@ -49,9 +47,6 @@ if not CHROMA_DIR.exists() or not any(CHROMA_DIR.iterdir()):
                 separators=["\n\n", "\n", ". ", " ", ""],
             )
             chunks = splitter.split_documents(all_documents)
-
-            # Ajouter headers contextuels
-            from ingest import add_contextual_headers
             chunks = add_contextual_headers(chunks)
 
             embeddings = get_embeddings()
@@ -63,6 +58,13 @@ if not CHROMA_DIR.exists() or not any(CHROMA_DIR.iterdir()):
             )
             st.success(f"{len(docs)} documents indexes ({len(chunks)} chunks)")
 
+# Sidebar navigation
+with st.sidebar:
+    st.markdown("### 📄 Assistant IA")
+    st.markdown("---")
+    st.page_link("pages/1_💬_Chat.py", label="💬 Chat", icon="💬")
+    st.page_link("pages/2_⚙️_Admin.py", label="⚙️ Administration", icon="⚙️")
+
 st.markdown("""
 <div class="app-header">
     <h1>📄 Assistant Documentaire IA</h1>
@@ -70,6 +72,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("Utilisez le menu de navigation pour acceder aux pages :")
-st.markdown("- **💬 Chat** — Posez vos questions sur vos documents")
-st.markdown("- **⚙️ Admin** — Gerez vos clients, documents et parametres")
+st.markdown("")
+col1, col2 = st.columns(2)
+with col1:
+    st.page_link("pages/1_💬_Chat.py", label="💬 Ouvrir le Chat", icon="💬", use_container_width=True)
+with col2:
+    st.page_link("pages/2_⚙️_Admin.py", label="⚙️ Administration", icon="⚙️", use_container_width=True)
