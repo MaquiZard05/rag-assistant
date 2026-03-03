@@ -36,8 +36,8 @@ rag-assistant/
 │   └── query.py           # Pipeline RAG (historique → hybride → rerank → LLM)
 ├── app.py                 # Point d'entrée Streamlit (CSS + redirect)
 ├── pages/
-│   ├── 1_💬_Chat.py       # Interface RAG (chat + upload + historique)
-│   └── 2_⚙️_Admin.py     # Panneau admin (clients, docs, prompts)
+│   ├── 1_Chat.py           # Interface RAG (chat + upload + historique)
+│   └── 2_Admin.py          # Panneau admin (clients, docs, prompts)
 ├── styles/
 │   └── main.css           # CSS pro externe
 ├── data/
@@ -134,6 +134,7 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - 2 clients demo : Duval BTP (5 docs, 62 chunks) + Pulse Digital (5 docs, 533 chunks)
   - Audit complet J+4 : scorecard C+, 4 correctifs immédiats appliqués
   - Fix sécurité : XSS (html.escape), exceptions loguées, page fallback non-PDF
+  - 8 corrections design : renommage pages sans emojis, DM Sans, masquage nav Streamlit, curseur pointer, sidebar-doc-name
 - **Jour 5** : Packaging commercial + outreach ⬅️ PROCHAIN
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
