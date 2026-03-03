@@ -221,8 +221,9 @@ with st.sidebar:
     st.markdown("---")
 
     # Navigation
-    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
     st.page_link("app.py", label="Accueil", icon=":material/home:")
+    st.page_link("pages/1_Chat.py", label="Chat", icon=":material/chat:", disabled=True)
+    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
 
 
 # --- Mapping categorie active → cle pour le filtrage RAG ---

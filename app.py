@@ -70,6 +70,7 @@ with st.sidebar:
     </div>
     ''', unsafe_allow_html=True)
     st.markdown("---")
+    st.page_link("app.py", label="Accueil", icon=":material/home:", disabled=True)
     st.page_link("pages/1_Chat.py", label="Chat", icon=":material/chat:")
     st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:")
 

@@ -93,8 +93,9 @@ with st.sidebar:
     </div>
     ''', unsafe_allow_html=True)
     st.markdown("---")
-    st.page_link("pages/1_Chat.py", label="Retour au Chat", icon=":material/chat:")
     st.page_link("app.py", label="Accueil", icon=":material/home:")
+    st.page_link("pages/1_Chat.py", label="Chat", icon=":material/chat:")
+    st.page_link("pages/2_Admin.py", label="Administration", icon=":material/settings:", disabled=True)
 
 # --- Header ---
 render_header("Administration", "Gerez vos clients, documents et parametres")

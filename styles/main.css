@@ -24,12 +24,12 @@
     --accent-dark: #D4891A;
     --accent-gradient: linear-gradient(135deg, #E8A23A 0%, #D4891A 100%);
 
-    /* Texte */
-    --text-primary: #F5F0E8;
-    --text-secondary: #A09A8E;
-    --text-tertiary: #6B6860;
-    --text-muted: #4A4740;
-    --text-disabled: #3D3529;
+    /* Texte — hierarchie lisible sur fond noir */
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-tertiary: #B0B0B0;
+    --text-muted: #999999;
+    --text-disabled: #666666;
 
     /* Scores */
     --score-high: #16a34a;
@@ -44,8 +44,13 @@
 /* === RESET STREAMLIT === */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-header {visibility: hidden;}
+[data-testid="stToolbar"] {visibility: hidden;}
 [data-testid="stSidebarNav"] {display: none !important;}
+
+/* Header transparent — garde le bouton sidebar visible */
+[data-testid="stHeader"] {
+    background-color: transparent !important;
+}
 
 /* === APP GLOBAL — aucun fond blanc nulle part === */
 .stApp,
@@ -55,11 +60,11 @@ header {visibility: hidden;}
 [data-testid="stBottomBlockContainer"] {
     background-color: var(--bg-primary) !important;
     font-family: var(--font-body);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 h1, h2, h3 {
-    color: var(--text-primary) !important;
+    color: var(--accent) !important;
     font-family: var(--font-body);
 }
 
@@ -70,7 +75,7 @@ h1, h2, h3 {
 }
 
 [data-testid="stSidebar"] * {
-    color: var(--text-secondary) !important;
+    color: var(--text-primary) !important;
 }
 
 [data-testid="stSidebar"] h3 {
@@ -94,7 +99,7 @@ h1, h2, h3 {
 }
 
 [data-testid="stSidebar"] .stSelectbox label {
-    color: var(--text-tertiary) !important;
+    color: var(--text-secondary) !important;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -103,7 +108,7 @@ h1, h2, h3 {
 /* Boutons sidebar — categories */
 [data-testid="stSidebar"] .stButton > button {
     background-color: transparent !important;
-    color: #C8C2B6 !important;
+    color: #FFFFFF !important;
     border: 1px solid var(--border-active) !important;
     border-radius: 8px !important;
     box-shadow: none !important;
@@ -171,7 +176,7 @@ h1, h2, h3 {
 
 .btp-logo-sub {
     font-size: 0.7rem;
-    color: var(--text-tertiary) !important;
+    color: var(--text-secondary) !important;
 }
 
 /* Sidebar catégorie bouton */
@@ -193,7 +198,7 @@ h1, h2, h3 {
 
 .sidebar-cat-count {
     font-size: 0.75rem;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-family: var(--font-mono);
 }
 
@@ -222,7 +227,7 @@ h1, h2, h3 {
 
 .sidebar-metric-label {
     font-size: 0.65rem;
-    color: var(--text-tertiary) !important;
+    color: var(--text-secondary) !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -230,7 +235,7 @@ h1, h2, h3 {
 /* Sidebar section label */
 .sidebar-section-label {
     font-size: 0.65rem;
-    color: var(--text-muted) !important;
+    color: var(--text-secondary) !important;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
@@ -240,7 +245,7 @@ h1, h2, h3 {
 /* Sidebar doc name */
 .sidebar-doc-name {
     font-size: 0.8rem;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     padding: 0.1rem 0;
     white-space: nowrap;
     overflow: hidden;
@@ -269,12 +274,12 @@ h1, h2, h3 {
 .chat-header-title {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-primary) !important;
+    color: var(--accent) !important;
 }
 
 .chat-header-sub {
     font-size: 0.7rem;
-    color: var(--text-tertiary) !important;
+    color: var(--text-secondary) !important;
 }
 
 .chat-header-status {
@@ -304,7 +309,7 @@ h1, h2, h3 {
 }
 
 [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
-    color: var(--text-secondary) !important;
+    color: var(--text-primary) !important;
     font-family: var(--font-body) !important;
 }
 
@@ -335,7 +340,7 @@ h1, h2, h3 {
 [data-testid="stChatInput"] > div > div {
     background-color: #1E1F22 !important;
     background: #1E1F22 !important;
-    color: #F5F0E8 !important;
+    color: #FFFFFF !important;
     border: 1px solid #2A2B2E !important;
     border-radius: 12px !important;
     box-shadow: none !important;
@@ -347,7 +352,7 @@ h1, h2, h3 {
 
 [data-testid="stChatInput"] textarea::placeholder,
 .stChatInputContainer textarea::placeholder {
-    color: #4A4740 !important;
+    color: #999999 !important;
 }
 
 /* Chat input focus */
@@ -381,14 +386,14 @@ h1, h2, h3 {
 [data-testid="stChatInput"] button:disabled,
 .stChatInputContainer button:disabled {
     background-color: #2A2B2E !important;
-    color: #4A4740 !important;
+    color: #666666 !important;
 }
 
 /* Disclaimer */
 .chat-disclaimer {
     text-align: center;
     font-size: 0.72rem;
-    color: var(--text-disabled);
+    color: var(--text-secondary);
     padding: 0.3rem 0 0;
 }
 
@@ -415,13 +420,13 @@ h1, h2, h3 {
 .welcome-title {
     font-size: 1.4rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--accent);
     margin: 0 0 0.4rem;
 }
 
 .welcome-subtitle {
     font-size: 0.9rem;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     max-width: 520px;
     margin: 0 auto 1.5rem;
     line-height: 1.5;
@@ -477,7 +482,7 @@ h1, h2, h3 {
 
 .sources-header {
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
@@ -496,7 +501,7 @@ h1, h2, h3 {
 }
 
 .source-file {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -504,7 +509,7 @@ h1, h2, h3 {
 }
 
 .source-page {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin: 0 1rem;
     flex-shrink: 0;
 }
@@ -571,7 +576,7 @@ button[kind="secondary"],
 .main .stButton > button {
     background-color: #1A1B1E !important;
     background: #1A1B1E !important;
-    color: #A09A8E !important;
+    color: #FFFFFF !important;
     border: 1px solid #2A2B2E !important;
     border-radius: 10px !important;
     padding: 0.5rem 1.2rem;
@@ -608,7 +613,7 @@ button[kind="secondary"]:hover,
     background-color: #1A1B1E !important;
     background: #1A1B1E !important;
     border: 1px solid #2A2B2E !important;
-    color: #A09A8E !important;
+    color: #FFFFFF !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -630,7 +635,7 @@ button[kind="secondary"]:hover,
 
 /* === FILE UPLOADER === */
 [data-testid="stFileUploader"] {
-    border: 1px dashed var(--border-active);
+    border: 2px dashed var(--accent) !important;
     border-radius: 10px;
     padding: 0.8rem;
     background-color: var(--bg-card);
@@ -638,8 +643,22 @@ button[kind="secondary"]:hover,
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: var(--accent);
+    border-color: var(--accent) !important;
     background-color: var(--bg-card-hover);
+}
+
+[data-testid="stFileUploader"] button {
+    background-color: var(--accent) !important;
+    color: var(--bg-primary) !important;
+    border: none !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stFileUploader"] small,
+[data-testid="stFileUploader"] span,
+[data-testid="stFileUploader"] p,
+[data-testid="stFileUploader"] [data-testid="stMarkdownContainer"] {
+    color: var(--text-secondary) !important;
 }
 
 /* === EXPANDERS === */
@@ -674,7 +693,7 @@ button[kind="secondary"]:hover,
 }
 
 .metric-card p {
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: 0.75rem;
     margin: 0.3rem 0 0;
     text-transform: uppercase;
@@ -712,7 +731,7 @@ button[kind="secondary"]:hover,
 
 .app-header p {
     margin: 0.3rem 0 0;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: 0.85rem;
 }
 
@@ -789,7 +808,7 @@ button[kind="secondary"]:hover,
 .stTooltipContent,
 div[role="tooltip"] {
     background-color: #1E1F22 !important;
-    color: #A09A8E !important;
+    color: #FFFFFF !important;
     border: 1px solid #2A2B2E !important;
 }
 
