@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant Conformit&eacute; Chantier BTP</title>
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: #E8E8E8;
+    background: #1A1A2E;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 18mm 16mm 14mm 16mm;
+    position: relative;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    margin-bottom: 14px;
+    border-bottom: 3px solid #E8A23A;
+    padding-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+  }
+  .header h1 span {
+    color: #E8A23A;
+  }
+  .header .baseline {
+    font-size: 11pt;
+    color: #B0B0C0;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ---- SECTIONS ---- */
+  .section {
+    margin-bottom: 13px;
+  }
+  .section-title {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #E8A23A;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .section p, .section li {
+    color: #D0D0D8;
+    font-size: 10pt;
+  }
+
+  /* ---- PROBLEM ---- */
+  .problem-grid {
+    display: flex;
+    gap: 12px;
+  }
+  .problem-card {
+    flex: 1;
+    background: #232340;
+    border-left: 3px solid #E8A23A;
+    padding: 10px 12px;
+    border-radius: 4px;
+  }
+  .problem-card .icon {
+    font-size: 18pt;
+    margin-bottom: 3px;
+  }
+  .problem-card strong {
+    color: #FFFFFF;
+    font-size: 10pt;
+  }
+  .problem-card p {
+    font-size: 9pt;
+    color: #A0A0B0;
+    margin-top: 2px;
+  }
+
+  /* ---- SOLUTION ---- */
+  .solution-box {
+    background: linear-gradient(135deg, #232340, #1E1E38);
+    border: 1px solid #E8A23A;
+    border-radius: 6px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .solution-box .big {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+  .solution-box .big span {
+    color: #E8A23A;
+  }
+  .solution-box .sub {
+    font-size: 9.5pt;
+    color: #B0B0C0;
+    margin-top: 4px;
+  }
+
+  /* ---- BENEFITS ---- */
+  .benefits-grid {
+    display: flex;
+    gap: 10px;
+  }
+  .benefit {
+    flex: 1;
+    text-align: center;
+    background: #232340;
+    border-radius: 6px;
+    padding: 12px 8px;
+  }
+  .benefit .num {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #E8A23A;
+  }
+  .benefit .label {
+    font-size: 9pt;
+    color: #D0D0D8;
+    margin-top: 2px;
+  }
+  .benefit .detail {
+    font-size: 8pt;
+    color: #808098;
+    margin-top: 2px;
+  }
+
+  /* ---- STEPS ---- */
+  .steps {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+  .step .circle {
+    width: 38px;
+    height: 38px;
+    background: #E8A23A;
+    color: #1A1A2E;
+    font-weight: 800;
+    font-size: 16pt;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+  .step .step-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+  .step .step-desc {
+    font-size: 8.5pt;
+    color: #A0A0B0;
+    margin-top: 2px;
+  }
+  .arrow {
+    flex: 0 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18pt;
+    color: #E8A23A;
+    padding-top: 8px;
+  }
+
+  /* ---- QUOTE ---- */
+  .quote-box {
+    background: #232340;
+    border-left: 4px solid #E8A23A;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-style: italic;
+  }
+  .quote-box .text {
+    font-size: 9.5pt;
+    color: #D0D0D8;
+  }
+  .quote-box .author {
+    font-size: 8.5pt;
+    color: #E8A23A;
+    margin-top: 4px;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* ---- PRICING ---- */
+  .pricing-grid {
+    display: flex;
+    gap: 10px;
+  }
+  .price-card {
+    flex: 1;
+    background: #232340;
+    border-radius: 6px;
+    padding: 12px 10px;
+    text-align: center;
+    border: 1px solid #2E2E50;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: #E8A23A;
+    transform: scale(1.03);
+  }
+  .price-card .badge {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #E8A23A;
+    color: #1A1A2E;
+    font-size: 7pt;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .price-card .plan-name {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 2px;
+  }
+  .price-card .price {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #E8A23A;
+  }
+  .price-card .price-sub {
+    font-size: 7.5pt;
+    color: #808098;
+  }
+  .price-card ul {
+    list-style: none;
+    margin-top: 6px;
+    text-align: left;
+    padding: 0 4px;
+  }
+  .price-card ul li {
+    font-size: 8pt;
+    color: #B0B0C0;
+    padding: 2px 0;
+    border-bottom: 1px solid #2A2A48;
+  }
+  .price-card ul li:last-child {
+    border-bottom: none;
+  }
+  .price-card ul li::before {
+    content: "\2713 ";
+    color: #E8A23A;
+    font-weight: 700;
+  }
+
+  /* ---- CTA ---- */
+  .cta-section {
+    text-align: center;
+    margin-top: 14px;
+    padding: 14px;
+    background: linear-gradient(135deg, #E8A23A, #D4922E);
+    border-radius: 8px;
+  }
+  .cta-section .cta-text {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1A1A2E;
+  }
+  .cta-section .cta-sub {
+    font-size: 9pt;
+    color: #3A2A10;
+    margin-top: 3px;
+  }
+  .cta-section .cta-button {
+    display: inline-block;
+    margin-top: 8px;
+    background: #1A1A2E;
+    color: #E8A23A;
+    font-weight: 700;
+    font-size: 11pt;
+    padding: 8px 28px;
+    border-radius: 30px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    text-align: center;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #2E2E50;
+    font-size: 8.5pt;
+    color: #808098;
+  }
+  .footer strong {
+    color: #E8A23A;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Assistant <span>Conformit&eacute;</span> Chantier BTP</h1>
+    <div class="baseline">Vos &eacute;quipes terrain posent une question &mdash; r&eacute;ponse sourc&eacute;e en 3 secondes avec le DTU, la page et le score de fiabilit&eacute;.</div>
+  </div>
+
+  <!-- PROBLEME -->
+  <div class="section">
+    <div class="section-title">Le probl&egrave;me sur vos chantiers</div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon">&#128337;</div>
+        <strong>Temps perdu</strong>
+        <p>Vos conducteurs de travaux passent 30 min &agrave; 1h par jour &agrave; chercher la bonne r&egrave;gle dans les DTU, CCTP ou fiches techniques.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">&#9888;&#65039;</div>
+        <strong>Risque non-conformit&eacute;</strong>
+        <p>Une mauvaise interpr&eacute;tation co&ucirc;te cher : reprises, litiges, p&eacute;nalit&eacute;s. Un d&eacute;faut de conformit&eacute; DTU = responsabilit&eacute; engag&eacute;e.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">&#128218;</div>
+        <strong>Docs &eacute;parpill&eacute;s</strong>
+        <p>DTU, normes, CCTP, DOE, fiches QSE... r&eacute;partis entre classeurs, mails et serveurs. Personne ne sait o&ugrave; est la derni&egrave;re version.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLUTION -->
+  <div class="section">
+    <div class="section-title">La solution</div>
+    <div class="solution-box">
+      <div class="big">Un assistant IA qui r&eacute;pond en <span>3 secondes</span> &mdash; avec la source exacte.</div>
+      <div class="sub">Posez votre question en langage courant. L'assistant cherche dans vos documents (DTU, CCTP, fiches techniques...) et vous renvoie la r&eacute;ponse pr&eacute;cise, la r&eacute;f&eacute;rence du document, la page, et un score de fiabilit&eacute;.</div>
+    </div>
+  </div>
+
+  <!-- BENEFICES -->
+  <div class="section">
+    <div class="section-title">B&eacute;n&eacute;fices concrets</div>
+    <div class="benefits-grid">
+      <div class="benefit">
+        <div class="num">3s</div>
+        <div class="label">Temps de r&eacute;ponse</div>
+        <div class="detail">Contre 30 min de recherche manuelle</div>
+      </div>
+      <div class="benefit">
+        <div class="num">100%</div>
+        <div class="label">Sourc&eacute;</div>
+        <div class="detail">Chaque r&eacute;ponse cite le document et la page</div>
+      </div>
+      <div class="benefit">
+        <div class="num">24/7</div>
+        <div class="label">Disponible</div>
+        <div class="detail">Accessible sur t&eacute;l&eacute;phone, tablette, PC</div>
+      </div>
+      <div class="benefit">
+        <div class="num">0</div>
+        <div class="label">Installation</div>
+        <div class="detail">100% en ligne, rien &agrave; installer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMENT CA MARCHE -->
+  <div class="section">
+    <div class="section-title">Comment &ccedil;a marche</div>
+    <div class="steps">
+      <div class="step">
+        <div class="circle">1</div>
+        <div class="step-title">Envoyez vos documents</div>
+        <div class="step-desc">DTU, CCTP, fiches techniques, DOE... On les int&egrave;gre dans votre espace d&eacute;di&eacute; et s&eacute;curis&eacute;.</div>
+      </div>
+      <div class="arrow">&#10132;</div>
+      <div class="step">
+        <div class="circle">2</div>
+        <div class="step-title">Posez votre question</div>
+        <div class="step-desc">&laquo;&nbsp;Quelle &eacute;paisseur d'isolant en toiture-terrasse DTU&nbsp;43.1&nbsp;?&nbsp;&raquo; &mdash; en langage courant.</div>
+      </div>
+      <div class="arrow">&#10132;</div>
+      <div class="step">
+        <div class="circle">3</div>
+        <div class="step-title">Recevez la r&eacute;ponse</div>
+        <div class="step-desc">R&eacute;ponse format fiche chantier : titre, valeurs en gras, point de vigilance, source et page.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMOIGNAGE -->
+  <div class="section">
+    <div class="section-title">T&eacute;moignage</div>
+    <div class="quote-box">
+      <div class="text">&laquo;&nbsp;Avant, mes gars m'appelaient 4 fois par jour pour v&eacute;rifier un DTU. Maintenant ils posent la question &agrave; l'assistant et ils ont la r&eacute;ponse imm&eacute;diatement, avec la page du document. On a gagn&eacute; un temps fou et on &eacute;vite les erreurs.&nbsp;&raquo;</div>
+      <div class="author">&mdash; Fr&eacute;d&eacute;ric M., Conducteur de travaux &mdash; PME 45 salari&eacute;s, Rh&ocirc;ne-Alpes</div>
+    </div>
+  </div>
+
+  <!-- TARIFS -->
+  <div class="section">
+    <div class="section-title">Nos offres</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="plan-name">Starter</div>
+        <div class="price">500&euro;</div>
+        <div class="price-sub">mise en place + 99&euro;/mois</div>
+        <ul>
+          <li>Jusqu'&agrave; 50 documents</li>
+          <li>3 utilisateurs</li>
+          <li>Support par email</li>
+          <li>Mises &agrave; jour incluses</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <div class="badge">Populaire</div>
+        <div class="plan-name">Pro</div>
+        <div class="price">1&nbsp;000&euro;</div>
+        <div class="price-sub">mise en place + 199&euro;/mois</div>
+        <ul>
+          <li>Jusqu'&agrave; 200 documents</li>
+          <li>10 utilisateurs</li>
+          <li>Filtrage par cat&eacute;gorie BTP</li>
+          <li>Support prioritaire</li>
+          <li>Formation &eacute;quipe incluse</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="plan-name">Premium</div>
+        <div class="price">1&nbsp;500&euro;</div>
+        <div class="price-sub">mise en place + 349&euro;/mois</div>
+        <ul>
+          <li>Documents illimit&eacute;s</li>
+          <li>Utilisateurs illimit&eacute;s</li>
+          <li>Personnalisation avanc&eacute;e</li>
+          <li>Interlocuteur d&eacute;di&eacute;</li>
+          <li>Int&eacute;gration outils m&eacute;tier</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-text">R&eacute;servez votre d&eacute;mo gratuite en 15 minutes</div>
+    <div class="cta-sub">On vous montre l'assistant en action sur vos propres documents &mdash; sans engagement.</div>
+    <a href="mailto:marin@liberte-ia.fr?subject=D%C3%A9mo%20Assistant%20BTP" class="cta-button">Demander une d&eacute;mo gratuite</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <strong>Marin</strong> &mdash; Consultant IA sp&eacute;cialis&eacute; BTP<br>
+    marin@liberte-ia.fr &nbsp;|&nbsp; 06 XX XX XX XX &nbsp;|&nbsp; liberte-ia.fr
+  </div>
+
+</div>
+</body>
+</html>

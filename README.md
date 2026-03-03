@@ -106,6 +106,20 @@ Question → Reformulation (historique) → Recherche hybride (vectorielle + BM2
 → Generation LLM (format fiche chantier) → Nettoyage post-LLM → Reponse + Sources separees
 ```
 
+## Offre commerciale
+
+3 offres adaptees aux PME BTP :
+
+| | Starter | Pro | Premium |
+|---|---|---|---|
+| **Setup** | 490 EUR | 990 EUR | 1 990 EUR |
+| **Mensuel** | 149 EUR/mois | 249 EUR/mois | 449 EUR/mois |
+| Documents | 50 max | 200 max | Illimite |
+| Utilisateurs | 3 | 10 | Illimite |
+| Support | Email 48h | Email 24h | Email + tel 4h |
+
+Demo gratuite de 15 min sur vos propres documents. Contact : marin@liberte-ia.fr
+
 ## Licence
 
 Projet prive — tous droits reserves.

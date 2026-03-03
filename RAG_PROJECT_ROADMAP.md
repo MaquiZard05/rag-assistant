@@ -86,11 +86,15 @@
 - [x] Jargon retire du header + "chunks" → "sections"
 - [x] Limite upload 50 MB
 
-**Packaging commercial (restant)**
-- [ ] Definir l'offre Starter/Pro/Maintenance
-- [ ] Rediger un one-pager commercial
-- [ ] Preparer templates de prospection
-- [ ] Premier outreach (20 prospects)
+**Packaging commercial (agent team : pricing + copywriter + prospects)**
+- [x] Analyse marche RAG/BTP + grille tarifaire 3 offres (Starter 490€, Pro 990€, Premium 1990€)
+- [x] One-pager commercial HTML imprimable A4 (dark theme BTP)
+- [x] 3 templates email de prospection (3 angles : temps perdu, risque, modernisation)
+- [x] 4 templates LinkedIn (connexion, InMail, relance, dirigeant)
+- [x] 4 templates DM (premier contact, event, relance, recommandation)
+- [x] Liste de 100 prospects PME BTP francaises reelles (14 regions, 6 categories)
+- [x] Plan d'action outreach 8 semaines (objectif : 10 clients a M6)
+- [ ] Premier outreach (20 prospects) — a lancer manuellement
 
 ---
 
@@ -147,4 +151,4 @@ Question utilisateur
 
 ---
 
-*Derniere mise a jour : 03/03/2026 (audit + corrections Top 5)*
+*Derniere mise a jour : 03/03/2026 (packaging commercial complet)*

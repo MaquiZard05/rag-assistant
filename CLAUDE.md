@@ -47,6 +47,14 @@ rag-assistant/
 ├── tests/
 │   ├── compare_chunks.py  # Script de test chunking
 │   └── test_categories.py # Tests filtrage par categorie BTP (pytest)
+├── commercial/
+│   ├── pricing.md         # Analyse marche + grille tarifaire 3 offres
+│   ├── one-pager.html     # One-pager commercial imprimable A4
+│   ├── template-email-froid.md  # 3 templates email prospection
+│   ├── template-linkedin.md     # 4 templates LinkedIn
+│   ├── template-dm.md           # 4 templates DM (WhatsApp/Telegram/SMS)
+│   ├── prospects.md             # 100 PME BTP francaises prospects
+│   └── plan-outreach.md         # Plan d'action outreach 8 semaines
 └── docs/
     └── *.pdf              # 6 PDFs demo BTP (DTU, CCTP, QSE, Fiches, DOE, Memo)
 ```
@@ -135,7 +143,7 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - Fix sécurité : XSS (html.escape), exceptions loguées, page fallback non-PDF
   - 8 corrections design : renommage pages sans emojis, DM Sans, masquage nav Streamlit, curseur pointer, sidebar-doc-name
   - Emojis UI remplaces par icones Material/SVG
-- **Jour 5** : Pivot BTP + packaging commercial ⬅️ EN COURS
+- **Jour 5** : Pivot BTP + packaging commercial ✅ TERMINE
   - Verticalisation "Assistant conformite chantier BTP"
   - Dark theme industrie : #1A1B1E, accent orange #E8A23A, Source Sans 3 + JetBrains Mono
   - Sidebar BTP : logo, categories chantier (Normes, CCTP, QSE, Fiches tech, DOE, Admin)
@@ -151,6 +159,13 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
     - clean_response() : regex post-LLM pour supprimer tout [Source X] residuel
     - Sources affichees separement sous la reponse (Markdown pur, indicateur pertinence)
   - 3/3 tests format valides (delais CCTP, accident chantier, Knauf TH38)
+  - **Packaging commercial (agent team : pricing + copywriter + prospects)** :
+    - Analyse marche RAG/BTP complete (prix freelance, concurrence SaaS, specificites BTP)
+    - Grille tarifaire : Starter 490€/149€, Pro 990€/249€, Premium 1990€/449€
+    - One-pager HTML A4 (dark theme, imprimable PDF)
+    - 3 templates email froid (3 angles), 4 templates LinkedIn, 4 templates DM
+    - 100 prospects PME BTP reelles (14 regions, 6 categories)
+    - Plan d'action outreach 8 semaines dans commercial/plan-outreach.md
   - **Filtrage par categorie BTP** :
     - `CATEGORY_FILTERS` dans query.py : 6 categories (normes→DTU, cctp→CCTP, qse→QSE, fiches→Fiches, doe→DOE, admin→Memo)
     - `hybrid_search()` + `ask()` acceptent `category: str | None` pour filtrer par type de document
