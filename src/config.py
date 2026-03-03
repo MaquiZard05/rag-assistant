@@ -37,7 +37,9 @@ CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 
 # --- Retrieval ---
-TOP_K = 5
+TOP_K = 5                # Minimum de chunks garantis apres reranking
+MAX_CHUNKS = 10          # Maximum absolu de chunks envoyes au LLM
+RERANK_THRESHOLD = 2.0   # Score cross-encoder minimum pour inclure un chunk au-dela de TOP_K
 RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 # --- Multi-tenant ---

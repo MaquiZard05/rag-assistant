@@ -12,7 +12,8 @@ from sentence_transformers import CrossEncoder
 
 from config import (
     GROQ_API_KEY, LLM_MODEL, RERANK_MODEL,
-    CHROMA_DIR, TOP_K, DEFAULT_COLLECTION, DEFAULT_SYSTEM_PROMPT,
+    CHROMA_DIR, TOP_K, MAX_CHUNKS, RERANK_THRESHOLD,
+    DEFAULT_COLLECTION, DEFAULT_SYSTEM_PROMPT,
 )
 
 # Seuil minimum de pertinence (cross-encoder score)
@@ -82,25 +83,28 @@ def contextualize_query(question: str, history: list, llm) -> str:
 def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
     """Recherche hybride : combine vectorielle (sens) + BM25 (mots-cles).
 
-    Recupere un large pool de candidats (top_k * 4 par methode) pour
-    donner au reranker suffisamment de chunks pertinents a evaluer.
+    Pool large pour ne pas rater de chunks pertinents.
+    Le BM25 cherche dans TOUS les documents (pas de limite artificielle)
+    pour compenser les faiblesses de l'embedding sur le vocabulaire technique BTP.
     """
-    pool_size = top_k * 4  # 20 candidats par methode
-
-    # 1. Recherche vectorielle
-    vector_results = vectorstore.similarity_search_with_score(question, k=pool_size)
-
-    # 2. Recherche BM25
+    # Sur une petite collection (< 500 chunks), on cherche dans TOUT
+    # et on laisse le cross-encoder reranker faire le tri final
     collection = vectorstore.get()
     if not collection or not collection.get("documents"):
-        return vector_results[:top_k]
+        return []
 
+    total_docs = len(collection["documents"])
+
+    # 1. Recherche vectorielle — TOUS les chunks
+    vector_results = vectorstore.similarity_search_with_score(question, k=total_docs)
+
+    # 2. Recherche BM25 — TOUS les chunks
     all_docs = []
     for i, text in enumerate(collection["documents"]):
         meta = collection["metadatas"][i] if collection.get("metadatas") else {}
         all_docs.append(Document(page_content=text, metadata=meta))
 
-    bm25_retriever = BM25Retriever.from_documents(all_docs, k=pool_size)
+    bm25_retriever = BM25Retriever.from_documents(all_docs, k=total_docs)
     bm25_results = bm25_retriever.invoke(question)
 
     # 3. Fusion RRF (Reciprocal Rank Fusion)
@@ -120,11 +124,19 @@ def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
             doc_scores[key] = {"doc": doc, "score": rrf_score, "original_score": 1.0}
 
     sorted_results = sorted(doc_scores.values(), key=lambda x: x["score"], reverse=True)
-    return [(r["doc"], r["original_score"]) for r in sorted_results[:pool_size]]
+    # Envoyer TOUT au reranker — c'est le cross-encoder qui decide
+    return [(r["doc"], r["original_score"]) for r in sorted_results]
 
 
 def rerank(question: str, chunks: list, top_k: int = TOP_K) -> list:
-    """Re-score les chunks avec un cross-encoder pour affiner la pertinence."""
+    """Re-score les chunks avec un cross-encoder — selection adaptative.
+
+    Au lieu d'un top_k fixe qui coupe arbitrairement, on utilise le score
+    du cross-encoder pour decider combien de chunks inclure :
+    - Garantit au moins top_k resultats (si disponibles)
+    - Inclut tout chunk supplementaire dont le score >= RERANK_THRESHOLD
+    - Plafonne a MAX_CHUNKS pour ne pas noyer le LLM
+    """
     if not chunks:
         return []
 
@@ -132,9 +144,20 @@ def rerank(question: str, chunks: list, top_k: int = TOP_K) -> list:
     pairs = [[question, doc.page_content] for doc, _score in chunks]
     scores = reranker.predict(pairs)
 
-    # Combiner les chunks avec leurs nouveaux scores
     ranked = sorted(zip(chunks, scores), key=lambda x: x[1], reverse=True)
-    return [(doc, float(rerank_score)) for (doc, _orig_score), rerank_score in ranked[:top_k]]
+
+    # Selection adaptative basee sur la confiance du reranker
+    result = []
+    for (doc, _orig_score), rerank_score in ranked:
+        if len(result) >= MAX_CHUNKS:
+            break
+        # Inclure si : dans le top_k garanti OU score suffisamment eleve
+        if len(result) < top_k or rerank_score >= RERANK_THRESHOLD:
+            result.append((doc, float(rerank_score)))
+        else:
+            break  # Scores tries decroissant — plus rien d'interessant apres
+
+    return result
 
 
 def build_context(chunks: list) -> str:
@@ -204,13 +227,13 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
 
     vectorstore = load_vectorstore(collection_name)
 
-    # Recherche hybride (top_k * 2 candidats)
+    # Recherche hybride (corpus complet → reranker decide)
     chunks = hybrid_search(vectorstore, search_question, top_k=top_k)
 
     if not chunks:
         return {"answer": "Aucun resultat trouve dans les documents.", "sources": [], "num_sources": 0}
 
-    # Reranking (affine au top_k final)
+    # Reranking adaptatif (top_k garanti + chunks supplementaires si confiants)
     chunks = rerank(search_question, chunks, top_k=top_k)
 
     # Filtrer les chunks non pertinents
