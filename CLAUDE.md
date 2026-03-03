@@ -182,6 +182,11 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
     - "chunks" renomme "sections" dans toute l'interface admin
     - Score apres corrections : B- (6-7/10)
     - Rapports detailles dans notes/audit/ (security.md, performance.md, ux-review.md, RAPPORT_AUDIT.md)
+  - **Audit UI critique (3 subagents paralleles)** :
+    - Hierarchie couleurs : titres #E8A23A (orange), texte principal #FFFFFF (blanc), secondaire #B0B0B0
+    - Zero texte gris fonce sur fond noir (couleurs interdites eliminees)
+    - Navigation uniforme : 3 liens identiques sur chaque page (Accueil, Chat, Admin) + page active disabled
+    - Sidebar toggle visible (header transparent, toolbar masque)
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 
