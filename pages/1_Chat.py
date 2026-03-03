@@ -85,6 +85,48 @@ def render_sources(sources):
     ''', unsafe_allow_html=True)
 
 
+def generate_response(question, indexed_files, active_client_id, active_client):
+    """Lance la requete RAG et affiche la reponse avec sources."""
+    with st.chat_message("assistant"):
+        if not indexed_files:
+            msg = "Aucun document disponible. Rendez-vous sur la page **Administration** pour en ajouter."
+            st.markdown(msg)
+            st.session_state.messages.append({"role": "assistant", "content": msg})
+        else:
+            typing_placeholder = st.empty()
+            typing_placeholder.markdown('''
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+            ''', unsafe_allow_html=True)
+
+            try:
+                result = ask(
+                    question,
+                    top_k=TOP_K,
+                    collection_name=active_client_id,
+                    system_prompt=active_client.get("system_prompt", ""),
+                    history=st.session_state.messages[:-1],
+                )
+
+                typing_placeholder.empty()
+
+                st.markdown(result["answer"])
+                render_sources(result["sources"])
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": result["answer"],
+                    "sources": result["sources"],
+                })
+
+            except Exception as e:
+                typing_placeholder.empty()
+                error_msg = f"Erreur : {e}"
+                st.error(error_msg)
+                st.session_state.messages.append({"role": "assistant", "content": error_msg})
+
+
 # --- Initialisation session ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -218,51 +260,23 @@ for message in st.session_state.messages:
         if message["role"] == "assistant" and "sources" in message:
             render_sources(message["sources"])
 
+# --- Question en attente (question suggeree sans reponse) ---
+if (
+    st.session_state.messages
+    and st.session_state.messages[-1]["role"] == "user"
+):
+    generate_response(
+        st.session_state.messages[-1]["content"],
+        indexed_files, active_client_id, active_client,
+    )
+
 # --- Input ---
 if prompt := st.chat_input("Posez votre question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        if not indexed_files:
-            msg = "Aucun document disponible. Rendez-vous sur la page **Administration** pour en ajouter."
-            st.markdown(msg)
-            st.session_state.messages.append({"role": "assistant", "content": msg})
-        else:
-            # Typing indicator
-            typing_placeholder = st.empty()
-            typing_placeholder.markdown('''
-            <div class="typing-indicator">
-                <span></span><span></span><span></span>
-            </div>
-            ''', unsafe_allow_html=True)
-
-            try:
-                result = ask(
-                    prompt,
-                    top_k=TOP_K,
-                    collection_name=active_client_id,
-                    system_prompt=active_client.get("system_prompt", ""),
-                    history=st.session_state.messages[:-1],
-                )
-
-                typing_placeholder.empty()
-
-                st.markdown(result["answer"])
-                render_sources(result["sources"])
-
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": result["answer"],
-                    "sources": result["sources"],
-                })
-
-            except Exception as e:
-                typing_placeholder.empty()
-                error_msg = f"Erreur : {e}"
-                st.error(error_msg)
-                st.session_state.messages.append({"role": "assistant", "content": error_msg})
+    generate_response(prompt, indexed_files, active_client_id, active_client)
 
 # Disclaimer
 st.markdown(
