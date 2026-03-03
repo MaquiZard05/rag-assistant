@@ -152,7 +152,14 @@ def build_context(chunks: list) -> str:
 
 def generate_answer(question: str, context: str, system_prompt: str = DEFAULT_SYSTEM_PROMPT) -> str:
     """Envoie la question + contexte au LLM via Groq."""
-    full_prompt = system_prompt + "\n\nContexte :\n{context}"
+    full_prompt = (
+        system_prompt
+        + "\n\nContexte (extraits de documents internes) :\n{context}"
+        + "\n\nIMPORTANT : Reponds de facon COMPLETE et DETAILLEE. "
+        "Extrais TOUTES les informations pertinentes du contexte ci-dessus. "
+        "Ne fais pas de resume d'une phrase — donne tous les details, chiffres, "
+        "seuils et references presentes dans les sources."
+    )
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", full_prompt),
