@@ -53,22 +53,21 @@ SUGGESTED_QUESTIONS = [
 ]
 
 
-def format_source_label(score):
-    """Convertit un score cross-encoder en label lisible."""
+def format_source_indicator(score):
+    """Convertit un score cross-encoder en indicateur visuel."""
     if score >= 5.0:
         return "Tres pertinent"
     elif score >= 2.0:
         return "Pertinent"
     else:
-        return "Pertinence faible"
+        return "Pertinence moderee"
 
 
 def render_sources(sources):
-    """Affiche les sources en Markdown pur — pas de HTML custom."""
+    """Affiche les sources en Markdown pur — format fiche chantier."""
     if not sources:
         return
 
-    # Filtrer les sources avec score trop bas
     displayed = [s for s in sources if s.get("score", 0) >= 0.3]
 
     if not displayed:
@@ -84,10 +83,10 @@ def render_sources(sources):
         filename = src.get("file", "Document inconnu")
         page = src.get("page")
         score = src.get("score", 0)
-        label = format_source_label(score)
+        indicator = format_source_indicator(score)
 
         page_str = f" — Page {page}" if page is not None else ""
-        lines.append(f"- **{filename}**{page_str} — {label}")
+        lines.append(f"- **{filename}**{page_str} — {indicator}")
 
     st.markdown("\n".join(lines))
 

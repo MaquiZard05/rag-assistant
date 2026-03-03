@@ -1,5 +1,6 @@
 """Script de query RAG : recherche hybride + reranking + generation sourcee."""
 
+import re
 import sys
 from pathlib import Path
 
@@ -161,32 +162,38 @@ def rerank(question: str, chunks: list, top_k: int = TOP_K) -> list:
 
 
 def build_context(chunks: list) -> str:
-    """Construit le contexte textuel a partir des chunks recuperes."""
+    """Construit le contexte textuel a partir des chunks recuperes.
+
+    Pas de marqueurs [Source X] — le LLM n'a pas besoin de citer les sources,
+    elles sont affichees separement par le front-end.
+    """
     parts = []
-    for i, (doc, _score) in enumerate(chunks, 1):
-        source = Path(doc.metadata.get("source", "inconnu")).name
-        page = doc.metadata.get("page")
-        if page is not None:
-            parts.append(f"[Source {i}: {source}, page {page + 1}]\n{doc.page_content}")
-        else:
-            parts.append(f"[Source {i}: {source}]\n{doc.page_content}")
+    for doc, _score in chunks:
+        parts.append(doc.page_content)
     return "\n\n---\n\n".join(parts)
+
+
+def clean_response(text: str) -> str:
+    """Supprime les marqueurs [Source X: ...] residuels de la reponse LLM."""
+    text = re.sub(r'\[Source \d+\s*:\s*[^\]]+\]', '', text)
+    text = re.sub(r'\(Source \d+\s*:\s*[^\)]+\)', '', text)
+    text = re.sub(r'  +', ' ', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
 
 
 def generate_answer(question: str, context: str, system_prompt: str = DEFAULT_SYSTEM_PROMPT) -> str:
     """Envoie la question + contexte au LLM via Groq."""
-    full_prompt = (
-        system_prompt
-        + "\n\nContexte (extraits de documents internes) :\n{context}"
-        + "\n\nIMPORTANT : Reponds de facon COMPLETE et DETAILLEE. "
-        "Extrais TOUTES les informations pertinentes du contexte ci-dessus. "
-        "Ne fais pas de resume d'une phrase — donne tous les details, chiffres, "
-        "seuils et references presentes dans les sources."
-    )
-
     prompt = ChatPromptTemplate.from_messages([
-        ("system", full_prompt),
-        ("human", "{question}"),
+        ("system", system_prompt),
+        ("human",
+         "Contexte extrait des documents internes :\n\n{context}\n\n"
+         "Question : {question}\n\n"
+         "Reponds en te basant UNIQUEMENT sur le contexte ci-dessus. "
+         "Ne cite PAS de numeros de source dans ta reponse. "
+         "Formate ta reponse comme une fiche chantier structuree. "
+         "Extrais TOUTES les informations pertinentes — chiffres, seuils, "
+         "delais, references. Sois COMPLET."),
     ])
 
     llm = ChatGroq(
@@ -250,7 +257,8 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
         }
 
     context = build_context(relevant_chunks)
-    answer = generate_answer(question, context, system_prompt=system_prompt)
+    raw_answer = generate_answer(question, context, system_prompt=system_prompt)
+    answer = clean_response(raw_answer)
 
     # Extraire les sources dedupliquees (seuil d'affichage)
     sources = []
