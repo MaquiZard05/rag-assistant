@@ -139,13 +139,17 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - Dark theme industrie : #1A1B1E, accent orange #E8A23A, Source Sans 3 + JetBrains Mono
   - Sidebar BTP : logo, categories chantier (Normes, CCTP, QSE, Fiches tech, DOE, Admin)
   - 6 questions suggerees BTP sur ecran d'accueil
-  - Sources en Markdown pur avec labels (Tres pertinent / Pertinent / Pertinence faible)
   - 6 PDFs BTP demo : DTU, CCTP, QSE, Fiches tech, DOE, Memo (89 chunks)
-  - System prompt strict : UNIQUEMENT les documents, JAMAIS de generalites
-  - Seuil de pertinence MIN_RELEVANCE_SCORE=0.3 (pas de LLM si rien pertinent)
-  - Reranking adaptatif : TOP_K=5 garanti + chunks supplementaires si score >= 2.0, max 10
-  - Recherche corpus complet (vector + BM25 sur 89 chunks) → cross-encoder decide
-  - 5/7 tests valides (6 questions BTP + hors-sujet) — Q4 limite par parsing tableau LLM
+  - **Retrieval** :
+    - Recherche corpus complet (vector + BM25 sur 89 chunks) → cross-encoder decide
+    - Reranking adaptatif : TOP_K=5 garanti + chunks au-dela si score >= 2.0, max 10
+    - Seuil de pertinence MIN_RELEVANCE_SCORE=0.3 (pas de LLM si rien pertinent)
+  - **Format reponses "fiche chantier"** :
+    - System prompt : titre emoji, sections, cle:valeur en gras, point de vigilance
+    - build_context() envoie le contenu brut (plus de marqueurs [Source X])
+    - clean_response() : regex post-LLM pour supprimer tout [Source X] residuel
+    - Sources affichees separement sous la reponse (Markdown pur, indicateur pertinence)
+  - 3/3 tests format valides (delais CCTP, accident chantier, Knauf TH38)
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 

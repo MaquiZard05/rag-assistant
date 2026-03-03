@@ -1,18 +1,20 @@
-# RAG Assistant — Assistant Documentaire IA
+# Assistant Conformite Chantier BTP
 
-Un assistant IA qui repond aux questions de vos equipes en s'appuyant sur vos propres documents.
+Assistant IA specialise BTP qui repond aux questions de vos equipes terrain en s'appuyant sur vos documents internes (DTU, CCTP, QSE, fiches techniques, DOE).
+
+**Pitch :** Vos equipes posent une question → reponse structuree en fiche chantier avec les sources en 3 secondes.
 
 ## Fonctionnalites
 
+- **Reponses format fiche chantier** : titre, sections, valeurs en gras, point de vigilance — exploitable en reunion
+- **Recherche hybride** : vectorielle + BM25 + reranking adaptatif cross-encoder (corpus complet)
+- **Sources separees** : affichees proprement sous la reponse avec indicateur de pertinence
 - **Upload de documents** (PDF, TXT, DOCX, HTML) avec indexation automatique
-- **Recherche hybride** : vectorielle (sens) + BM25 (mots-cles) + reranking cross-encoder
-- **Reponses sourcees** avec nom du fichier, numero de page et score de pertinence
-- **Indicateur de confiance** (base sur le score de reranking)
 - **Multi-client** : espaces de travail isoles par client (collection ChromaDB separee)
 - **Historique conversation** : reformulation automatique des questions avec contexte
-- **System prompt personnalisable** par client
+- **System prompt personnalisable** par client (format fiche chantier pour le BTP)
 - **Panneau admin** : gestion clients, documents, prompts
-- **Interface web professionnelle** style ChatGPT (Streamlit)
+- **Dark theme industrie** adapte au terrain (orange chantier, contrastes forts)
 - **Deploiement** Streamlit Cloud (gratuit)
 
 ## Installation
@@ -70,7 +72,7 @@ L'application s'ouvre sur `http://localhost:8501`. Les documents de demo sont in
 | LLM | Groq API (Llama 3, gratuit) |
 | Embeddings | HuggingFace sentence-transformers (local) |
 | Reranking | Cross-encoder ms-marco-MiniLM-L-6-v2 |
-| Interface | Streamlit |
+| Interface | Streamlit (dark theme BTP) |
 | Deploiement | Streamlit Cloud |
 
 ## Structure du projet
@@ -87,7 +89,7 @@ rag-assistant/
 │   ├── ingest.py          # Ingestion multi-format → ChromaDB
 │   └── query.py           # Pipeline RAG (hybride → rerank → LLM)
 ├── styles/
-│   └── main.css           # Design system (DM Sans, dark sidebar)
+│   └── main.css           # Design system BTP (dark theme, orange chantier)
 ├── data/
 │   ├── clients.json       # Config clients
 │   └── chroma_db/         # Base vectorielle (generee)
@@ -99,8 +101,9 @@ rag-assistant/
 ## Pipeline RAG
 
 ```
-Question → Reformulation (historique) → Recherche hybride (vectorielle + BM25)
-→ Fusion RRF → Reranking cross-encoder → Generation LLM → Reponse sourcee
+Question → Reformulation (historique) → Recherche hybride (vectorielle + BM25, corpus complet)
+→ Fusion RRF → Reranking adaptatif cross-encoder (TOP_K garanti + seuil confiance)
+→ Generation LLM (format fiche chantier) → Nettoyage post-LLM → Reponse + Sources separees
 ```
 
 ## Licence
