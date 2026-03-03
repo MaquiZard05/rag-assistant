@@ -15,6 +15,12 @@ from config import (
     CHROMA_DIR, TOP_K, DEFAULT_COLLECTION, DEFAULT_SYSTEM_PROMPT,
 )
 
+# Seuil minimum de pertinence (cross-encoder score)
+# En dessous, le chunk n'est pas envoye au LLM
+MIN_RELEVANCE_SCORE = 0.3
+# Seuil minimum pour afficher une source a l'utilisateur
+MIN_DISPLAY_SCORE = -2.0
+
 
 # Charger le reranker une seule fois (evite de le recharger a chaque question)
 _reranker = None
@@ -200,18 +206,31 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
     # Reranking (affine au top_k final)
     chunks = rerank(search_question, chunks, top_k=top_k)
 
-    context = build_context(chunks)
+    # Filtrer les chunks non pertinents
+    relevant_chunks = [(doc, score) for doc, score in chunks if score >= MIN_RELEVANCE_SCORE]
+
+    if not relevant_chunks:
+        return {
+            "answer": "Aucune information trouvee dans les documents internes pour cette question. "
+                      "Verifiez que les documents pertinents sont bien charges, ou reformulez votre "
+                      "question avec des termes plus specifiques (ex : numero de DTU, reference CCTP, "
+                      "nom de procedure).",
+            "sources": [],
+            "num_sources": 0,
+        }
+
+    context = build_context(relevant_chunks)
     answer = generate_answer(question, context, system_prompt=system_prompt)
 
-    # Extraire les sources dedupliquees
+    # Extraire les sources dedupliquees (seuil d'affichage)
     sources = []
     seen = set()
-    for doc, score in chunks:
+    for doc, score in relevant_chunks:
         source = Path(doc.metadata.get("source", "inconnu")).name
         page = doc.metadata.get("page")
         page_display = page + 1 if page is not None else None
         key = (source, page_display)
-        if key not in seen:
+        if key not in seen and score >= MIN_DISPLAY_SCORE:
             seen.add(key)
             sources.append({"file": source, "page": page_display, "score": score})
 

@@ -53,36 +53,43 @@ SUGGESTED_QUESTIONS = [
 ]
 
 
+def format_source_label(score):
+    """Convertit un score cross-encoder en label lisible."""
+    if score >= 5.0:
+        return "Tres pertinent"
+    elif score >= 2.0:
+        return "Pertinent"
+    else:
+        return "Pertinence faible"
+
+
 def render_sources(sources):
-    """Affiche les sources dans un bloc monospace style terminal."""
+    """Affiche les sources en Markdown pur — pas de HTML custom."""
     if not sources:
         return
 
-    rows_html = ""
-    for src in sources:
-        score_pct = min(100, max(0, src["score"] * 10))
-        page_info = f"p.{src['page']}" if src.get("page") is not None else ""
+    # Filtrer les sources avec score trop bas
+    displayed = [s for s in sources if s.get("score", 0) >= 0.3]
 
-        if score_pct >= 90:
-            score_class = "score-high"
-        elif score_pct >= 80:
-            score_class = "score-medium"
-        else:
-            score_class = "score-low"
+    if not displayed:
+        st.markdown("*Aucune source suffisamment pertinente pour cette question.*")
+        return
 
-        rows_html += f'''
-        <div class="source-row">
-            <span class="source-file">{escape(src["file"])}</span>
-            <span class="source-page">{page_info}</span>
-            <span class="source-score {score_class}">{score_pct:.0f}%</span>
-        </div>'''
+    lines = []
+    lines.append("---")
+    lines.append(f"**Sources utilisees** ({len(displayed)})")
+    lines.append("")
 
-    st.markdown(f'''
-    <div class="sources-block">
-        <div class="sources-header">Sources ({len(sources)})</div>
-        {rows_html}
-    </div>
-    ''', unsafe_allow_html=True)
+    for src in displayed:
+        filename = src.get("file", "Document inconnu")
+        page = src.get("page")
+        score = src.get("score", 0)
+        label = format_source_label(score)
+
+        page_str = f" — Page {page}" if page is not None else ""
+        lines.append(f"- **{filename}**{page_str} — {label}")
+
+    st.markdown("\n".join(lines))
 
 
 def generate_response(question, indexed_files, active_client_id, active_client):
