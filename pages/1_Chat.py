@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from config import TOP_K, DEFAULT_COLLECTION
 from ingest import get_indexed_files
-from query import ask
+from query import ask, CATEGORY_FILTERS
 from clients import list_clients
 
 # --- Configuration ---
@@ -91,7 +91,7 @@ def render_sources(sources):
     st.markdown("\n".join(lines))
 
 
-def generate_response(question, indexed_files, active_client_id, active_client):
+def generate_response(question, indexed_files, active_client_id, active_client, active_cat_key=None):
     """Lance la requete RAG et affiche la reponse avec sources."""
     with st.chat_message("assistant"):
         if not indexed_files:
@@ -113,6 +113,7 @@ def generate_response(question, indexed_files, active_client_id, active_client):
                     collection_name=active_client_id,
                     system_prompt=active_client.get("system_prompt", ""),
                     history=st.session_state.messages[:-1],
+                    category=active_cat_key,
                 )
 
                 typing_placeholder.empty()
@@ -195,12 +196,19 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section-label">Base documentaire</div>', unsafe_allow_html=True)
 
     for cat in BTP_CATEGORIES:
+        is_active = st.session_state.active_category == cat["label"]
         if st.button(
             f":{cat['icon']}: {cat['label']}",
             key=f"cat_{cat['key']}",
             use_container_width=True,
+            type="primary" if is_active else "secondary",
         ):
-            st.session_state.active_category = cat["label"]
+            # Toggle : recliquer desactive le filtre
+            if st.session_state.active_category == cat["label"]:
+                st.session_state.active_category = None
+            else:
+                st.session_state.active_category = cat["label"]
+            st.rerun()
 
     st.markdown("---")
 
@@ -217,15 +225,23 @@ with st.sidebar:
     st.page_link("app.py", label="Accueil", icon=":material/home:")
 
 
+# --- Mapping categorie active → cle pour le filtrage RAG ---
+active_cat_key = None
+if st.session_state.active_category:
+    for cat in BTP_CATEGORIES:
+        if cat["label"] == st.session_state.active_category:
+            active_cat_key = cat["key"]
+            break
+
 # --- Header zone chat ---
 active_cat_label = st.session_state.active_category or "Tous les documents"
 st.markdown(f'''
 <div class="chat-header">
     <div class="chat-header-left">
         <span class="chat-header-title">{escape(active_cat_label)}</span>
-        <span class="chat-header-sub">Recherche hybride (vectorielle + BM25 + reranking)</span>
+        <span class="chat-header-sub">Recherche intelligente dans vos documents</span>
     </div>
-    <div class="chat-header-status">Systeme actif</div>
+    <div class="chat-header-status">{escape(active_client["name"])} — {len(indexed_files)} documents</div>
 </div>
 ''', unsafe_allow_html=True)
 
@@ -273,7 +289,7 @@ if (
 ):
     generate_response(
         st.session_state.messages[-1]["content"],
-        indexed_files, active_client_id, active_client,
+        indexed_files, active_client_id, active_client, active_cat_key,
     )
 
 # --- Input ---
@@ -282,7 +298,7 @@ if prompt := st.chat_input("Posez votre question..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    generate_response(prompt, indexed_files, active_client_id, active_client)
+    generate_response(prompt, indexed_files, active_client_id, active_client, active_cat_key)
 
 # Disclaimer
 st.markdown(

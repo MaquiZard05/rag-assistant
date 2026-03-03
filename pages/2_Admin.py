@@ -1,5 +1,7 @@
 """Page Admin — Gestion clients, documents, upload, system prompts."""
 
+import os
+import re
 import sys
 import tempfile
 from html import escape
@@ -33,6 +35,31 @@ def load_css(css_file: str):
 
 
 load_css("styles/main.css")
+
+
+# --- Protection Admin ---
+def _check_admin_access():
+    """Verifie le mot de passe admin si configure."""
+    try:
+        admin_pw = os.getenv("ADMIN_PASSWORD") or st.secrets.get("ADMIN_PASSWORD", "")
+    except Exception:
+        admin_pw = os.getenv("ADMIN_PASSWORD", "")
+    if not admin_pw:
+        return  # Pas de mot de passe configure = acces libre (dev local)
+    if "admin_authenticated" not in st.session_state:
+        st.session_state.admin_authenticated = False
+    if not st.session_state.admin_authenticated:
+        st.markdown("### Acces administration")
+        password = st.text_input("Mot de passe", type="password")
+        if st.button("Connexion"):
+            if password == admin_pw:
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("Mot de passe incorrect.")
+        st.stop()
+
+_check_admin_access()
 
 
 def render_header(title, subtitle=None):
@@ -88,7 +115,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     render_metric(total_docs, "Documents")
 with col2:
-    render_metric(total_chunks, "Chunks")
+    render_metric(total_chunks, "Sections")
 with col3:
     render_metric(len(clients), "Clients")
 
@@ -108,8 +135,8 @@ with st.form("new_client_form"):
     if submitted:
         if not new_id or not new_name:
             st.error("L'identifiant et le nom sont obligatoires.")
-        elif " " in new_id:
-            st.error("L'identifiant ne doit pas contenir d'espaces.")
+        elif " " in new_id or not re.match(r'^[a-z0-9][a-z0-9_-]{1,62}[a-z0-9]$', new_id.lower().strip()):
+            st.error("Identifiant invalide. Lettres minuscules, chiffres, tirets uniquement (3-64 caracteres).")
         else:
             if create_client(new_id.lower().strip(), new_name.strip()):
                 st.success(f"Client '{new_name}' cree.")
@@ -123,7 +150,7 @@ st.markdown("---")
 for cid, client in clients.items():
     stats = all_stats.get(cid, {"num_docs": 0, "num_chunks": 0, "files": []})
 
-    with st.expander(f"{client['name']} — {stats['num_docs']} doc(s), {stats['num_chunks']} chunks"):
+    with st.expander(f"{client['name']} — {stats['num_docs']} doc(s), {stats['num_chunks']} sections"):
 
         # Upload de documents pour ce client
         st.markdown("**Ajouter des documents**")
@@ -137,6 +164,12 @@ for cid, client in clients.items():
 
         if uploaded_files:
             for uploaded_file in uploaded_files:
+                # Limite de taille
+                MAX_FILE_SIZE_MB = 50
+                if uploaded_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+                    st.error(f"{uploaded_file.name} depasse la limite de {MAX_FILE_SIZE_MB} MB.")
+                    continue
+
                 processed_key = f"processed_{cid}_{uploaded_file.name}"
                 if processed_key not in st.session_state:
                     with st.spinner(f"Indexation de {uploaded_file.name}..."):
@@ -151,7 +184,7 @@ for cid, client in clients.items():
                                 collection_name=cid,
                                 original_name=uploaded_file.name,
                             )
-                            st.success(f"{uploaded_file.name} — {num_chunks} chunks indexes")
+                            st.success(f"{uploaded_file.name} — {num_chunks} sections indexees")
                             st.session_state[processed_key] = True
                         except Exception as e:
                             st.error(f"Erreur : {e}")
@@ -168,7 +201,7 @@ for cid, client in clients.items():
                 with col_btn:
                     if st.button("Supprimer", key=f"del_doc_{cid}_{filename}"):
                         deleted = delete_document(cid, filename)
-                        st.success(f"{filename} supprime ({deleted} chunks)")
+                        st.success(f"{filename} supprime ({deleted} sections supprimees)")
                         st.rerun()
 
         st.markdown("---")

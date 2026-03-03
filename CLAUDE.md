@@ -45,7 +45,8 @@ rag-assistant/
 │   ├── clients.json       # Config clients (Thermex BTP + Pulse Digital)
 │   └── chroma_db/         # Base vectorielle ChromaDB (persistante)
 ├── tests/
-│   └── compare_chunks.py  # Script de test chunking
+│   ├── compare_chunks.py  # Script de test chunking
+│   └── test_categories.py # Tests filtrage par categorie BTP (pytest)
 └── docs/
     └── *.pdf              # 6 PDFs demo BTP (DTU, CCTP, QSE, Fiches, DOE, Memo)
 ```
@@ -141,7 +142,7 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
   - 6 questions suggerees BTP sur ecran d'accueil
   - 6 PDFs BTP demo : DTU, CCTP, QSE, Fiches tech, DOE, Memo (89 chunks)
   - **Retrieval** :
-    - Recherche corpus complet (vector + BM25 sur 89 chunks) → cross-encoder decide
+    - Recherche pre-filtree : vector(top_k*4) + BM25(top_k*4) au lieu de corpus complet
     - Reranking adaptatif : TOP_K=5 garanti + chunks au-dela si score >= 2.0, max 10
     - Seuil de pertinence MIN_RELEVANCE_SCORE=0.3 (pas de LLM si rien pertinent)
   - **Format reponses "fiche chantier"** :
@@ -150,6 +151,22 @@ Après chaque bloc de travail significatif (feature, fix, audit, etc.) :
     - clean_response() : regex post-LLM pour supprimer tout [Source X] residuel
     - Sources affichees separement sous la reponse (Markdown pur, indicateur pertinence)
   - 3/3 tests format valides (delais CCTP, accident chantier, Knauf TH38)
+  - **Filtrage par categorie BTP** :
+    - `CATEGORY_FILTERS` dans query.py : 6 categories (normes→DTU, cctp→CCTP, qse→QSE, fiches→Fiches, doe→DOE, admin→Memo)
+    - `hybrid_search()` + `ask()` acceptent `category: str | None` pour filtrer par type de document
+    - Boutons sidebar fonctionnels : toggle on/off, distinction visuelle (type="primary")
+    - 10/10 tests pytest (test_categories.py) : filtrage par categorie, multi-source, edge cases
+  - **Audit J+5 complet (agent team : security + performance + ux-review)** :
+    - Score avant corrections : D+ (4/10) — 28 findings (6 critiques, 7 hauts, 12 moyens, 5 bas)
+    - Top 5 corrections appliquees :
+      1. Pre-filtrage reranker : candidate_pool = top_k*4 au lieu de corpus complet (-80% latence)
+      2. Mot de passe Admin (ADMIN_PASSWORD via env/secrets)
+      3. Validation regex client_id + sanitisation filenames
+      4. Jargon retire du header ("Recherche intelligente dans vos documents")
+      5. Limite upload 50 MB
+    - "chunks" renomme "sections" dans toute l'interface admin
+    - Score apres corrections : B- (6-7/10)
+    - Rapports detailles dans notes/audit/ (security.md, performance.md, ux-review.md, RAPPORT_AUDIT.md)
 
 > Quand Marin dit "on est au jour X", applique les objectifs de ce jour. Ne propose pas de tâches du jour suivant.
 

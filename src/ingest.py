@@ -1,5 +1,6 @@
 """Script d'ingestion : charge les documents (PDF, TXT, DOCX, HTML), decoupe en chunks, stocke dans ChromaDB."""
 
+import re
 import sys
 from pathlib import Path
 
@@ -128,8 +129,9 @@ def ingest_single_file(file_path: Path, collection_name: str = DEFAULT_COLLECTIO
 
     # Remplacer le chemin temporaire par le vrai nom de fichier
     if original_name:
+        safe_name = re.sub(r'[^\w\s\-\.]', '_', original_name)[:255]
         for doc in documents:
-            doc.metadata["source"] = original_name
+            doc.metadata["source"] = safe_name
 
     # Decouper en chunks + ajouter les headers contextuels
     chunks = split_documents(documents)

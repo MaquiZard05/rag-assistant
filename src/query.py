@@ -23,6 +23,16 @@ MIN_RELEVANCE_SCORE = 0.3
 # Seuil minimum pour afficher une source a l'utilisateur
 MIN_DISPLAY_SCORE = -2.0
 
+# Mapping categorie BTP → pattern dans le nom de fichier source
+CATEGORY_FILTERS = {
+    "normes": "DTU",
+    "cctp": "CCTP",
+    "qse": "QSE",
+    "fiches": "Fiches",
+    "doe": "DOE",
+    "admin": "Memo",
+}
+
 
 # Charger le reranker une seule fois (evite de le recharger a chaque question)
 _reranker = None
@@ -81,31 +91,51 @@ def contextualize_query(question: str, history: list, llm) -> str:
     return response.content.strip()
 
 
-def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
+def hybrid_search(vectorstore, question: str, top_k: int = TOP_K,
+                   category: str | None = None) -> list:
     """Recherche hybride : combine vectorielle (sens) + BM25 (mots-cles).
 
-    Pool large pour ne pas rater de chunks pertinents.
-    Le BM25 cherche dans TOUS les documents (pas de limite artificielle)
-    pour compenser les faiblesses de l'embedding sur le vocabulaire technique BTP.
+    Pre-filtre un pool de candidats (top_k * 4) au lieu de scanner tout le corpus.
+    Le cross-encoder reranker recoit ~20 candidats au lieu de N, ce qui passe
+    de O(n) a O(1) pour le reranking.
+    Si category est fourni, filtre les documents dont le nom de fichier source
+    contient le pattern correspondant.
     """
-    # Sur une petite collection (< 500 chunks), on cherche dans TOUT
-    # et on laisse le cross-encoder reranker faire le tri final
+    # Pool de candidats : top_k * 4 pour laisser de la marge au reranker
+    candidate_pool = top_k * 4
+
+    # Determiner le pattern de filtrage par categorie
+    cat_pattern = None
+    if category and category in CATEGORY_FILTERS:
+        cat_pattern = CATEGORY_FILTERS[category].lower()
+
+    # 1. Recherche vectorielle — top candidats seulement
+    vector_results = vectorstore.similarity_search_with_score(question, k=candidate_pool)
+
+    # Filtrer les resultats vectoriels par categorie si demande
+    if cat_pattern:
+        vector_results = [
+            (doc, score) for doc, score in vector_results
+            if cat_pattern in doc.metadata.get("source", "").lower()
+        ]
+
+    # 2. Recherche BM25 — index sur tout le corpus, retrieval limite
     collection = vectorstore.get()
     if not collection or not collection.get("documents"):
-        return []
+        return [(doc, score) for doc, score in vector_results[:candidate_pool]]
 
-    total_docs = len(collection["documents"])
-
-    # 1. Recherche vectorielle — TOUS les chunks
-    vector_results = vectorstore.similarity_search_with_score(question, k=total_docs)
-
-    # 2. Recherche BM25 — TOUS les chunks
     all_docs = []
     for i, text in enumerate(collection["documents"]):
         meta = collection["metadatas"][i] if collection.get("metadatas") else {}
+        # Filtrer par categorie si demande
+        if cat_pattern and cat_pattern not in meta.get("source", "").lower():
+            continue
         all_docs.append(Document(page_content=text, metadata=meta))
 
-    bm25_retriever = BM25Retriever.from_documents(all_docs, k=total_docs)
+    if not all_docs:
+        return [(doc, score) for doc, score in vector_results[:candidate_pool]]
+
+    bm25_retriever = BM25Retriever.from_documents(all_docs, k=candidate_pool)
     bm25_results = bm25_retriever.invoke(question)
 
     # 3. Fusion RRF (Reciprocal Rank Fusion)
@@ -125,8 +155,8 @@ def hybrid_search(vectorstore, question: str, top_k: int = TOP_K) -> list:
             doc_scores[key] = {"doc": doc, "score": rrf_score, "original_score": 1.0}
 
     sorted_results = sorted(doc_scores.values(), key=lambda x: x["score"], reverse=True)
-    # Envoyer TOUT au reranker — c'est le cross-encoder qui decide
-    return [(r["doc"], r["original_score"]) for r in sorted_results]
+    # Limiter au pool de candidats pour le reranker
+    return [(r["doc"], r["original_score"]) for r in sorted_results[:candidate_pool]]
 
 
 def rerank(question: str, chunks: list, top_k: int = TOP_K) -> list:
@@ -209,7 +239,8 @@ def generate_answer(question: str, context: str, system_prompt: str = DEFAULT_SY
 
 
 def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLECTION,
-        system_prompt: str = DEFAULT_SYSTEM_PROMPT, history: list = None) -> dict:
+        system_prompt: str = DEFAULT_SYSTEM_PROMPT, history: list = None,
+        category: str | None = None) -> dict:
     """Pose une question au RAG. Pipeline complet :
     1. Reformulation avec historique
     2. Recherche hybride (vectorielle + BM25)
@@ -234,8 +265,8 @@ def ask(question: str, top_k: int = TOP_K, collection_name: str = DEFAULT_COLLEC
 
     vectorstore = load_vectorstore(collection_name)
 
-    # Recherche hybride (corpus complet → reranker decide)
-    chunks = hybrid_search(vectorstore, search_question, top_k=top_k)
+    # Recherche hybride (pool pre-filtre → reranker affine)
+    chunks = hybrid_search(vectorstore, search_question, top_k=top_k, category=category)
 
     if not chunks:
         return {"answer": "Aucun resultat trouve dans les documents.", "sources": [], "num_sources": 0}
